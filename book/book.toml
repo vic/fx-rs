@@ -1,0 +1,10 @@
+[book]
+authors = ["Victor Borja"]
+language = "en"
+src = "src"
+title = "Fx.rs"
+
+[output.html]
+additional-css = ["./theme/catppuccin.css"]
+default-theme = "frappe"
+preferred-dark-theme = "mocha"

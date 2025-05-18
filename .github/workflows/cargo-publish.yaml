@@ -1,4 +1,4 @@
-name: cargo
+name: cargo-publish
 on:
   push:
     tags:
