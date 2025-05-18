@@ -4,6 +4,12 @@
 
 modeled after Scala's [Kyo](https://getkyo.io) and Golang's [Fx.go](https://github.com/vic/fx.go)
 
+```shell
+cargo add fx-rs
+```
+
+# Crate: https://crates.io/crates/fx-rs
+
 # Read the Book: https://vic.github.io/fx-rs
 
 # Rust API: https://docs.rs/fx-rs
