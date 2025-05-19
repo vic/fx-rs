@@ -67,22 +67,26 @@ impl<'f, S, V> Fx<'f, S, V> {
     }
 }
 
-impl<'a, A: Copy, B: Copy, V> Fx<'a, And<A, B>, V> {
-    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> {
+impl<'a, A, B, V> Fx<'a, And<A, B>, V> {
+    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> 
+    where A: Clone, B: Clone
+    {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_left(ab)),
-            Eff::Pending(f) => f(ab).rec_provide_left(ab),
+            Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_left(ab.clone())),
+            Eff::Pending(f) => f(ab.clone()).rec_provide_left(ab),
         }
     }
 
-    pub fn provide_left(self, a: A) -> Fx<'a, B, V> {
+    pub fn provide_left(self, a: A) -> Fx<'a, B, V> 
+    where A: Clone, B: Clone
+    {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().provide_left(a)),
+            Eff::Stopped(f) => Fx::stopped(move || f().provide_left(a.clone())),
             Eff::Pending(f) => Fx::pending(move |b: B| {
-                let ab = And::new(a, b);
-                f(ab).rec_provide_left(ab)
+                let ab = And::new(a.clone(), b);
+                f(ab.clone()).rec_provide_left(ab)
             }),
         }
     }
