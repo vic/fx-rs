@@ -1,14 +1,13 @@
 use crate::Fx;
 
-type StrLen = fn(&str) -> usize;
-fn str_len(s: &str) -> usize {
-    s.len()
-}
-
 #[test]
-fn test_apply() {
+fn ctx_fn_apply() {
+    type StrLen = fn(&str) -> usize;
     let e = Fx::<StrLen, usize>::apply("hello");
-    let p = e.provide(str_len);
-    let v = p.eval();
+
+    fn str_len(s: &str) -> usize {
+        s.len()
+    }
+    let v = e.provide(str_len).eval();
     assert_eq!(v, Some("hello".len()))
 }
