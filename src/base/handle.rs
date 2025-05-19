@@ -25,4 +25,11 @@ impl<'f, I, O> Fx<'f, I, O> {
     {
         move |e| e.provide_left(f)
     }
+
+    /*
+
+    func Handle[F ~func(Fx[And[A, B], O]) Fx[B, O], A ~func(I) Fx[B, O], B, I, O any](i I) Fx[And[F, B], O] {
+        return Suspend[F](Suspend[A](i))
+    }
+         */
 }

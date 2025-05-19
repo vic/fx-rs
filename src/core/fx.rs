@@ -3,22 +3,25 @@ use super::And;
 #[derive(Copy, Clone)]
 pub struct Nil;
 
-pub struct Fx<'f, S, V>(FxPriv<'f, S, V>);
+pub struct Fx<'f, S, V>(Eff<'f, S, V>);
 
-enum FxPriv<'f, S: 'f, V: 'f> {
+enum Eff<'f, S, V> {
     Immediate(V),
-    Pending(Box<dyn Fn(S) -> Fx<'f, S, V> + 'f>),
-    Stopped(Box<dyn Fn() -> Fx<'f, S, V> + 'f>),
+    Pending(Continue<'f, S, V>),
+    Stopped(Resume<'f, S, V>),
 }
+
+struct Continue<'f, S: 'f, V: 'f>(Box<dyn Fn(S) -> Fx<'f, S, V> + 'f>);
+struct Resume<'f, S, V>(Box<dyn Fn() -> Fx<'f, S, V> + 'f>);
 
 impl<'f, V> Fx<'f, Nil, V> {
     pub fn eval(self) -> Option<V> {
         let mut e = self;
         loop {
             match e.0 {
-                FxPriv::Immediate(v) => return Some(v),
-                FxPriv::Stopped(_) => return None,
-                FxPriv::Pending(f) => e = f(Nil),
+                Eff::Immediate(v) => return Some(v),
+                Eff::Stopped(_) => return None,
+                Eff::Pending(f) => e = f.0(Nil),
             }
         }
     }
@@ -26,15 +29,18 @@ impl<'f, V> Fx<'f, Nil, V> {
 
 impl<'f, S, V> Fx<'f, S, V> {
     pub fn immediate(value: V) -> Self {
-        Fx(FxPriv::Immediate(value))
+        Fx(Eff::Immediate(value))
     }
 
-    pub fn pending<F: Fn(S) -> Self + 'f>(f: F) -> Self {
-        Fx(FxPriv::Pending(Box::new(f)))
+    pub fn pending<F>(f: F) -> Self
+    where
+        F: Fn(S) -> Self + 'f,
+    {
+        Fx(Eff::Pending(Continue(Box::new(f))))
     }
 
     pub fn stopped<F: Fn() -> Self + 'f>(f: F) -> Self {
-        Fx(FxPriv::Stopped(Box::new(f)))
+        Fx(Eff::Stopped(Resume(Box::new(f))))
     }
 
     pub fn start<F>(self, r: F) -> Self
@@ -42,9 +48,9 @@ impl<'f, S, V> Fx<'f, S, V> {
         F: Fn(Self) -> Self + Copy + 'f,
     {
         match self.0 {
-            FxPriv::Stopped(f) => r(f()),
-            FxPriv::Immediate(v) => Fx::immediate(v),
-            FxPriv::Pending(f) => Fx::pending(move |s: S| f(s).start(r)),
+            Eff::Stopped(f) => r(f.0()),
+            Eff::Immediate(v) => Fx::immediate(v),
+            Eff::Pending(f) => Fx::pending(move |s: S| f.0(s).start(r)),
         }
     }
 
@@ -54,9 +60,9 @@ impl<'f, S, V> Fx<'f, S, V> {
         F: Fn(V) -> Fx<'f, T, U> + Copy + 'f,
     {
         match self.0 {
-            FxPriv::Immediate(v) => fmap(v),
-            FxPriv::Stopped(f) => Fx::stopped(move || f().then(cmap, fmap)),
-            FxPriv::Pending(f) => Fx::pending(move |t: T| f(cmap(t)).then(cmap, fmap)),
+            Eff::Immediate(v) => fmap(v),
+            Eff::Stopped(f) => Fx::stopped(move || f.0().then(cmap, fmap)),
+            Eff::Pending(f) => Fx::pending(move |t: T| f.0(cmap(t)).then(cmap, fmap)),
         }
     }
 }
@@ -64,19 +70,19 @@ impl<'f, S, V> Fx<'f, S, V> {
 impl<'a, A: Copy, B: Copy, V> Fx<'a, And<A, B>, V> {
     fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> {
         match self.0 {
-            FxPriv::Immediate(v) => Fx::immediate(v),
-            FxPriv::Stopped(f) => Fx::stopped(move || f().rec_provide_left(ab)),
-            FxPriv::Pending(f) => f(ab).rec_provide_left(ab),
+            Eff::Immediate(v) => Fx::immediate(v),
+            Eff::Stopped(f) => Fx::stopped(move || f.0().rec_provide_left(ab)),
+            Eff::Pending(f) => f.0(ab).rec_provide_left(ab),
         }
     }
 
     pub fn provide_left(self, a: A) -> Fx<'a, B, V> {
         match self.0 {
-            FxPriv::Immediate(v) => Fx::immediate(v),
-            FxPriv::Stopped(f) => Fx::stopped(move || f().provide_left(a)),
-            FxPriv::Pending(f) => Fx::pending(move |b: B| {
+            Eff::Immediate(v) => Fx::immediate(v),
+            Eff::Stopped(f) => Fx::stopped(move || f.0().provide_left(a)),
+            Eff::Pending(f) => Fx::pending(move |b: B| {
                 let ab = And::new(a, b);
-                f(ab).rec_provide_left(ab)
+                f.0(ab).rec_provide_left(ab)
             }),
         }
     }
