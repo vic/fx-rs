@@ -14,7 +14,7 @@ enum Eff<'f, S: 'f, V: 'f> {
 type Continue<'f, S, V> = Box<dyn Fn(S) -> Fx<'f, S, V> + 'f>;
 type Start<'f, S, V> = Box<dyn Fn() -> Fx<'f, S, V> + 'f>;
 
-impl<'f, V> Fx<'f, Nil, V> {
+impl<V> Fx<'_, Nil, V> {
     pub fn eval(self) -> Option<V> {
         let mut e = self;
         loop {
@@ -68,8 +68,10 @@ impl<'f, S, V> Fx<'f, S, V> {
 }
 
 impl<'a, A, B, V> Fx<'a, And<A, B>, V> {
-    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> 
-    where A: Clone, B: Clone
+    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V>
+    where
+        A: Clone,
+        B: Clone,
     {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
@@ -78,8 +80,10 @@ impl<'a, A, B, V> Fx<'a, And<A, B>, V> {
         }
     }
 
-    pub fn provide_left(self, a: A) -> Fx<'a, B, V> 
-    where A: Clone, B: Clone
+    pub fn provide_left(self, a: A) -> Fx<'a, B, V>
+    where
+        A: Clone,
+        B: Clone,
     {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
