@@ -1,11 +1,28 @@
-use crate::Fx;
+use crate::{And, Fx};
 
-impl<'f, F, O> Fx<'f, F, O> {
-    pub fn apply<I>(i: I) -> Self
+impl<'f, I, O> Fx<'f, I, O> {
+    pub fn apply<F>(i: I) -> Fx<'f, F, O>
     where
         I: Copy + 'f,
         F: Fn(I) -> O,
     {
         Fx::map(Fx::ctx(), move |f: F| f(i))
+    }
+
+    pub fn suspend<F, B>(i: I) -> Fx<'f, And<F, B>, O>
+    where
+        I: Copy + 'f,
+        B: 'f,
+        F: Fn(I) -> Fx<'f, B, O>,
+    {
+        Fx::and_flat(Fx::apply(i))
+    }
+
+    pub fn handler<F, B>(f: F) -> impl Fn(Fx<'f, And<F, B>, O>) -> Fx<'f, B, O>
+    where
+        B: Copy + 'f,
+        F: Fn(I) -> Fx<'f, B, O> + Copy,
+    {
+        move |e| e.provide_left(f)
     }
 }
