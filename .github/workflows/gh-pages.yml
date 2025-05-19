@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build
-        run: nix run nixpkgs#mdbook -- build book
+        run: nix develop -c book
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

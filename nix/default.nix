@@ -2,8 +2,7 @@
 {
   systems = import inputs.systems;
   imports = [
-    inputs.devshell.flakeModule
-    inputs.treefmt-nix.flakeModule
+    ./devshell.nix
     ./treefmt.nix
   ];
 }
