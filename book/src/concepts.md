@@ -30,11 +30,10 @@ Examples of such Abilities are:
 - exception handling (eg, interruption/resumption and finalizers)
 - anything else that interacts with the world outside of the program.
 
-
 ## Handlers
 
 A *Handler* for the `S` ability is a particular _interpretation_ of what `S` means.
 
-Handlers are the only _side-effectful_ portion of your programs. It is possible, and quite common, to have different handlers (interpretations) for the same Ability, and each Handler  decides _how/when_ to perform world-modifying _side-effects_.
+Handlers are the only _side-effectful_ portion of your programs. It is possible, and quite common, to have different handlers (interpretations) for the same Ability, and each Handler decides _how/when_ to perform world-modifying _side-effects_.
 
 For example, for an _http-request_ ability you can have a *test-handler* that just mock responses to fixed values so that you can easily assert on known values on your tests. You could also have a *live-handler* that actually performs requests via the network for production runs.

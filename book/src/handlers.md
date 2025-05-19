@@ -28,7 +28,6 @@ assert(*x == 5)
 
 As you might guess, `fx.Handler` is just a wrapper for `ProvideLeft(Fx[And[Fn, S], O], Fn) Fx[S, O]` where `Fn = func(I) Fx[S, O]`, an request-effect function.
 
-
 ## Requesting Handlers (effect-transformers) from the environment.
 
 Of course, you can also request that a particular effect transformer (Handler) be present as a requirement of some computation. This way the handler is provided only once but can be applied anywhere it is needed inside the program.

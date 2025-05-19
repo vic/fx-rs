@@ -10,8 +10,8 @@ Fx.rs is currently experimental.
 API surface is *very much* in flux and evolving.
 
 New effects will be added as they are discovered to be useful in the Rust ecosystem.
-</div>
 
+</div>
 
 ### How are Algebraic Effects useful?
 
@@ -28,6 +28,5 @@ If you want to read more about different language implementations and theory beh
 - [Unison Abilities](https://www.unison-lang.org/docs/language-reference/abilities-and-ability-handlers/)
 - [Kyo (Scala3)](https://github.com/getkyo/kyo/) - special thanks to [@fbrasisil](https://x.com/fbrasisil), Kyo's author who kindly provided a minimal kyo-core that helped [me](https://x.com/oeiuwq) understand algebraic effect systems and inspired this library.
 - [Fx.go] my original library for Golang.
-
 
 However, `Fx.rs` has a different surface API since we are trying to provide the best dev-experience for Rust programmers.

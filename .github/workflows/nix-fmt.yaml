@@ -1,4 +1,4 @@
-name: cargo-test
+name: fmt
 on:
   push:
     branches: ["main"]
@@ -9,4 +9,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cargo test
+      - uses: cachix/install-nix-action@v30
+      - run: nix fmt -- --ci

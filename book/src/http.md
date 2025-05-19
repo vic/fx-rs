@@ -4,7 +4,6 @@ As an example of the concepts we have seen so far, lets write a program that nee
 
 On an effect system like `Fx.go`, we *do not* directly contact external services, we just express our need to perform such requests and we expect a `Handler` to actually decide how and when such request should be performed (if any).
 
-
 ```go
 package http_example
 

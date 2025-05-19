@@ -1,4 +1,4 @@
-mod core;
 mod base;
+mod core;
 
-pub use core::{Fx, Nil, And};
+pub use core::{And, Fx, Nil};

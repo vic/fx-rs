@@ -1,6 +1,5 @@
 use super::{Fx, Nil};
 
-
 #[test]
 fn eval_constant() {
     let e = Fx::immediate(22);

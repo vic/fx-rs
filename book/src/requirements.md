@@ -6,7 +6,7 @@ In this chapter we will talk about aggregating requirements using the `And` type
 
 ## Composite requirements
 
-Using the same "length of string" function from the previous chapters, we can describe it in different ways. 
+Using the same "length of string" function from the previous chapters, we can describe it in different ways.
 
 ```go
 // This is an strange way of writing `func(string) int`.
@@ -25,6 +25,7 @@ type LenFn = func(string) Fx[Nil, int]
 ```
 
 Note that all of the following types are equivalent, as they describe the very same requirements and result types:
+
 - `func(string) int`
 - `Fx[string, int]`
 - `func(string) func() int`
@@ -38,8 +39,6 @@ The last three examples represent nested effects and are equivalent to functions
 `And[A, B]` is the requirement for both `A` and `B` abilities. Notice in the last two examples, that their components are swapped. It is important to note that in `Fx.go`, _the *order* of the abilities on And requirements does not matter_ and they can be freely swapped/joined/unjoined. More on this when we talk about `And*` combinators.
 
 Also, note that `And[A, Nil]` is equivalent to just `A`. All of these types represent the same type of computation and an effect can be transformed to any of those types freely.
-
-
 
 ## `>1` arity functions as effects.
 
@@ -61,5 +60,3 @@ func MulLen(s string, n int) int {
 - `Fx[And[int, string], int]`
 
 Note that `And[X, X]` is equivalent to just a single `X` requirement, and that `And[And[X, Y], And[Y, X]]` is also equivalent to `And[X, Y]`.
-
-

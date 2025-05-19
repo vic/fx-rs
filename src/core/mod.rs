@@ -1,8 +1,8 @@
-mod fx;
 mod and;
+mod fx;
 
 #[cfg(test)]
 mod test;
 
-pub use fx::{Fx, Nil};
 pub use and::And;
+pub use fx::{Fx, Nil};

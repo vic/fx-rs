@@ -4,7 +4,6 @@ An important thing to note is that in `Fx.go`, *requirements are identified by t
 
 *Effect requirements can be freely re-arranged* with no impact in the meaning of the program.
 
-
 ## `And*` combinators.
 
 There are some functions (more will be added as they are found useful) that help you re-arrange `And`ed effect requirements.

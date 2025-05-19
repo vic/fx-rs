@@ -50,9 +50,8 @@ func FuncExample() {
 From the code above:
 
 - `Func(func (S) V)` produces a _pending_ effect of type `Fx[S, V]`.
-- `Provide(Fx[S, V], S)` discharges the `S` requirement and returns `Fx[Nil, V]`.  
-    Note that *no computation* is performed in this step. `Fx[Nil, V]` is still a description of a program, and `V` has not been computed yet, nor any side-effect has been performed.
+- `Provide(Fx[S, V], S)` discharges the `S` requirement and returns `Fx[Nil, V]`.\
+  Note that *no computation* is performed in this step. `Fx[Nil, V]` is still a description of a program, and `V` has not been computed yet, nor any side-effect has been performed.
 - `Eval(Fx[Nil, V])` will actually perform the computation of `V`. Since all `non-Nil` requirements have already been provided, the computation can be run.
-
 
 These two are the most basic effects in `Fx.go`. More interesting effects will be presented as we explore the topics of effect Rquests and Handlers.

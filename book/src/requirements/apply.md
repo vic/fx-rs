@@ -1,6 +1,6 @@
 # Functional Requirements
 
-As we have seen in the previous [Context](context.html) chapter, you can ask for any type to be part of an effect's environment. 
+As we have seen in the previous [Context](context.html) chapter, you can ask for any type to be part of an effect's environment.
 
 You can also ask for functions of some type to be present and use them in your program descriptions without knowing their exact implementation.
 
@@ -21,7 +21,6 @@ var b Fx[OnInt, int] = Apply[OnInt](12)
 ```
 
 Because `OnInt` is part of the environment, we only know its signature (its request and response type), but not the actual implementation of it. This way, different implementations of `OnInt` can be provided later.
-
 
 Now, suppose you have the following code:
 
@@ -46,6 +45,4 @@ var x Fx[And[Http, HttpService], HttpRs] = Suspend[Http](url)
 
 `fx.Suspend` is an abbreviation of `AndJoin(Apply[Http](url))` for *effect requests* (functions returning an effect)
 
-
 This is the principle behind *suspended effect application* in `Fx.go` and is a fundamental part when we talk about effect [Requests](../requests.html) and [Handlers](../handlers.html).
-

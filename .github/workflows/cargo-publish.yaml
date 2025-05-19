@@ -10,4 +10,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: echo -n "${{secrets.CARGO_REGISTRY_TOKEN}}" | cargo login
-      - run: cargo publish 
+      - run: cargo publish

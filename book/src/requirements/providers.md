@@ -2,7 +2,6 @@
 
 *Effect requirements can be provided in any order* with no impact in the evaluation of the program.
 
-
 ## `Provide*` Combinators.
 
 These functions are used to eliminate requirements from effects. Only when `Nil` is the only remaining requirement, the effect can be evaluated.

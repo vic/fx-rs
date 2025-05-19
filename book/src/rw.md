@@ -2,9 +2,10 @@
 
 A `Reader[T]` allows to read values of type `T` from the environment while `Writer[T]` allows to set them.
 
-- Implementation 
-   - [read.go](https://github.com/vic/fx.go/blob/main/rw/read.go)
-   - [write.go](https://github.com/vic/fx.go/blob/main/rw/write.go)
+- Implementation
+
+  - [read.go](https://github.com/vic/fx.go/blob/main/rw/read.go)
+  - [write.go](https://github.com/vic/fx.go/blob/main/rw/write.go)
 
 - Tests [rw_test.go](https://github.com/vic/fx.go/blob/main/rw/rw_test.go)
 
