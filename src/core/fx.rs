@@ -1,20 +1,18 @@
 use super::And;
+use dyn_clone::{DynClone, clone_trait_object};
 
 #[derive(Copy, Clone)]
 pub struct Nil;
 
-pub struct Fx<'f, S, V>(Eff<'f, S, V>);
+pub struct Fx<'f, S: 'f, V: Clone + 'f>(Eff<'f, S, V>);
 
-enum Eff<'f, S: 'f, V: 'f> {
+enum Eff<'f, S: 'f, V: Clone + 'f> {
     Immediate(V),
     Pending(Continue<'f, S, V>),
     Stopped(Start<'f, S, V>),
 }
 
-type Continue<'f, S, V> = Box<dyn Fn(S) -> Fx<'f, S, V> + 'f>;
-type Start<'f, S, V> = Box<dyn Fn() -> Fx<'f, S, V> + 'f>;
-
-impl<V> Fx<'_, Nil, V> {
+impl<V: Clone> Fx<'_, Nil, V> {
     pub fn eval(self) -> Option<V> {
         let mut e = self;
         loop {
@@ -27,19 +25,22 @@ impl<V> Fx<'_, Nil, V> {
     }
 }
 
-impl<'f, S, V> Fx<'f, S, V> {
+impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn immediate(value: V) -> Self {
         Fx(Eff::Immediate(value))
     }
 
     pub fn pending<F>(f: F) -> Self
     where
-        F: Fn(S) -> Self + 'f,
+        F: Fn(S) -> Self + Clone + 'f,
     {
         Fx(Eff::Pending(Box::new(f)))
     }
 
-    pub fn stopped<F: Fn() -> Self + 'f>(f: F) -> Self {
+    pub fn stopped<F>(f: F) -> Self
+    where
+        F: Fn() -> Self + Clone + 'f,
+    {
         Fx(Eff::Stopped(Box::new(f)))
     }
 
@@ -56,6 +57,7 @@ impl<'f, S, V> Fx<'f, S, V> {
 
     pub fn then<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
+        U: Clone,
         C: Fn(T) -> S + Copy + 'f,
         F: Fn(V) -> Fx<'f, T, U> + Copy + 'f,
     {
@@ -67,7 +69,7 @@ impl<'f, S, V> Fx<'f, S, V> {
     }
 }
 
-impl<'a, A, B, V> Fx<'a, And<A, B>, V> {
+impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
     fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V>
     where
         A: Clone,
@@ -93,5 +95,39 @@ impl<'a, A, B, V> Fx<'a, And<A, B>, V> {
                 f(ab.clone()).rec_provide_left(ab)
             }),
         }
+    }
+}
+
+trait ContinueFn<'f, S: 'f, V: Clone + 'f>: DynClone + Fn(S) -> Fx<'f, S, V> + 'f {}
+
+impl<'f, S: 'f, V: Clone + 'f, F> ContinueFn<'f, S, V> for F where
+    F: Fn(S) -> Fx<'f, S, V> + Clone + 'f
+{
+}
+
+clone_trait_object!(<'f, S: 'f, V: Clone + 'f> ContinueFn<'f, S, V>);
+
+type Continue<'f, S, V> = Box<dyn ContinueFn<'f, S, V>>;
+
+trait StartFn<'f, S: 'f, V: Clone + 'f>: DynClone + Fn() -> Fx<'f, S, V> + 'f {}
+
+impl<'f, S: 'f, V: Clone + 'f, F> StartFn<'f, S, V> for F where F: Fn() -> Fx<'f, S, V> + Clone + 'f {}
+
+clone_trait_object!(<'f, S: 'f, V: Clone + 'f> StartFn<'f, S, V>);
+type Start<'f, S, V> = Box<dyn StartFn<'f, S, V>>;
+
+impl<'f, S: 'f, V: Clone + 'f> Clone for Eff<'f, S, V> {
+    fn clone(&self) -> Self {
+        match self {
+            Eff::Immediate(v) => Eff::Immediate(v.clone()),
+            Eff::Pending(f) => Eff::Pending(f.clone()),
+            Eff::Stopped(f) => Eff::Stopped(f.clone()),
+        }
+    }
+}
+
+impl<'f, S: 'f, V: Clone + 'f> Clone for Fx<'f, S, V> {
+    fn clone(&self) -> Self {
+        Fx(self.0.clone())
     }
 }

@@ -1,10 +1,10 @@
 use crate::{And, Fx};
 
-impl<'f, I, O> Fx<'f, I, O> {
+impl<'f, I, O: Clone> Fx<'f, I, O> {
     pub fn apply<F>(i: I) -> Fx<'f, F, O>
     where
         I: Copy + 'f,
-        F: Fn(I) -> O,
+        F: Fn(I) -> O + Clone,
     {
         Fx::map(Fx::ctx(), move |f: F| f(i))
     }
@@ -13,7 +13,7 @@ impl<'f, I, O> Fx<'f, I, O> {
     where
         I: Copy + 'f,
         B: 'f,
-        F: Fn(I) -> Fx<'f, B, O>,
+        F: Fn(I) -> Fx<'f, B, O> + Clone,
     {
         Fx::and_flat(Fx::apply(i))
     }

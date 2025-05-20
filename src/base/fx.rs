@@ -6,22 +6,22 @@ impl<'f> Fx<'f, Nil, Nil> {
     }
 }
 
-impl<'f, V> Fx<'f, Nil, V> {
+impl<'f, V: Clone> Fx<'f, Nil, V> {
     pub fn pure(v: V) -> Fx<'f, Nil, V> {
         Fx::immediate(v)
     }
 }
 
-impl<'f, S> Fx<'f, S, S> {
+impl<'f, S: Clone> Fx<'f, S, S> {
     pub fn ctx() -> Self {
         Fx::func(|s| s)
     }
 }
 
-impl<'f, S, V> Fx<'f, S, V> {
+impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn func<F>(f: F) -> Fx<'f, S, V>
     where
-        F: Fn(S) -> V + 'f,
+        F: Fn(S) -> V + Clone + 'f,
     {
         Fx::pending(move |s: S| Fx::immediate(f(s)))
     }
