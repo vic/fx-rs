@@ -4,16 +4,6 @@
 
   perSystem =
     { pkgs, ... }:
-    let
-      fenix = inputs.fenix.packages.${pkgs.system};
-      nightly = fenix.latest.withComponents [
-        "cargo"
-        "rust-src"
-        "rustc"
-        "rustfmt"
-        "rust-analyzer"
-      ];
-    in
     {
       devshells.default = {
         commands = [
@@ -45,7 +35,7 @@
         ];
 
         devshell.packages = [
-          nightly
+          inputs.self.packages.${pkgs.system}.rust-toolchain
           pkgs.cargo-tarpaulin
           pkgs.mdbook
           pkgs.gcc
