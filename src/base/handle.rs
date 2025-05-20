@@ -9,7 +9,7 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         Fx::ctx().map(move |f: F| f(i))
     }
 
-    pub fn suspend<F, B>(i: I) -> Fx<'f, And<F, B>, O>
+    pub fn request<F, B>(i: I) -> Fx<'f, And<F, B>, O>
     where
         I: Copy + 'f,
         B: 'f,
@@ -32,6 +32,6 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         B: Clone + 'f,
         I: Copy,
     {
-        Fx::ctx().flat_map(move |h: Handler<'f, And<F, B>, B, O, O>| h.handle(Fx::suspend(i)))
+        Fx::ctx().flat_map(move |h: Handler<'f, And<F, B>, B, O, O>| h.handle(Fx::request(i)))
     }
 }

@@ -8,15 +8,15 @@ fn test_apply_ctx_fn() {
 }
 
 #[test]
-fn test_suspend() {
-    let e = Fx::suspend("hello");
+fn test_request() {
+    let e = Fx::request("hello");
     let v = e.provide_left(|s: &str| Fx::pure(s.len())).eval();
     assert_eq!(v, Some("hello".len()))
 }
 
 #[test]
 fn test_handler() {
-    let e = Fx::suspend("hello");
+    let e = Fx::request("hello");
     let handler = Fx::handler(|s: &str| Fx::pure(s.len()));
     let v = handler.handle(e).eval();
     assert_eq!(v, Some("hello".len()))
