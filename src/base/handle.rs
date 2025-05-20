@@ -1,5 +1,4 @@
-use crate::{And, Fx};
-use dyn_clone::{DynClone, clone_trait_object};
+use crate::{And, Fx, Handler};
 
 impl<'f, I, O: Clone> Fx<'f, I, O> {
     pub fn apply<F>(i: I) -> Fx<'f, F, O>
@@ -35,38 +34,4 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
     {
         Fx::ctx().flat_map(move |h: Handler<'f, And<F, B>, B, O, O>| h.handle(Fx::suspend(i)))
     }
-}
-
-#[derive(Clone)]
-pub struct Handler<'f, A, B, U: Clone, V: Clone>(Box<dyn HandlerFn<'f, A, B, U, V> + 'f>);
-impl<'f, A, B, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
-    pub fn new<F>(f: F) -> Self
-    where
-        F: Fn(Fx<'f, A, U>) -> Fx<'f, B, V> + Clone + 'f,
-    {
-        Handler(Box::new(f))
-    }
-
-    pub fn handle(&self, e: Fx<'f, A, U>) -> Fx<'f, B, V> {
-        self.0(e)
-    }
-}
-
-clone_trait_object!(<'f, A, B, U:Clone, V:Clone> HandlerFn<'f, A, B, U, V>);
-trait HandlerFn<'f, A, B, U, V>: DynClone + Fn(Fx<'f, A, U>) -> Fx<'f, B, V> + 'f
-where
-    V: Clone + 'f,
-    U: Clone + 'f,
-    A: 'f,
-    B: 'f,
-{
-}
-impl<'f, A, B, U: Clone, V: Clone, F> HandlerFn<'f, A, B, U, V> for F
-where
-    F: Fn(Fx<'f, A, U>) -> Fx<'f, B, V> + Clone + 'f,
-    V: Clone + 'f,
-    U: Clone + 'f,
-    A: 'f,
-    B: 'f,
-{
 }

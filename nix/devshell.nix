@@ -18,6 +18,21 @@
             help = "Test coverate at tarpaulin-report.html";
             command = "cargo tarpaulin --out Html";
           }
+
+          {
+            name = "fmt";
+            help = "Format all files";
+            command = "nix fmt";
+          }
+
+          {
+            name = "tests";
+            help = "Run project tests";
+            command = "cargo test";
+          }
+
+          { package = pkgs.cargo; }
+          { package = pkgs.mdbook; }
         ];
 
         devshell.packages =
@@ -29,6 +44,7 @@
           in
           [
             pkgs.cargo
+            pkgs.rustfmt
             pkgs.rust-analyzer
             pkgs.cargo-tarpaulin
             pkgs.mdbook
