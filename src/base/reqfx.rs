@@ -14,7 +14,7 @@ where
         Fx::ctx().flat_map(move |f: Self| f.apply(i))
     }
 
-    pub fn handle(i: I) -> Fx<'f, And<Handler<'f, And<Self, S>, S, O, O>, S>, O>
+    pub fn request(i: I) -> Fx<'f, And<Handler<'f, And<Self, S>, S, O, O>, S>, O>
     where
         I: Copy,
         S: Clone,
