@@ -18,12 +18,12 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         Fx::and_flat(Fx::apply(i))
     }
 
-    pub fn handler<F, B>(f: F) -> impl Fn(Fx<'f, And<F, B>, O>) -> Fx<'f, B, O>
+    pub fn handler<F, B>(f: F) -> Box<dyn Fn(Fx<'f, And<F, B>, O>) -> Fx<'f, B, O> + 'f>
     where
         B: Copy + 'f,
-        F: Fn(I) -> Fx<'f, B, O> + Copy,
+        F: Fn(I) -> Fx<'f, B, O> + Copy + 'f,
     {
-        move |e| e.provide_left(f)
+        Box::new(move |e| e.provide_left(f))
     }
 
     pub fn handle<F, A, B>(i: I) -> Fx<'f, And<F, B>, O>

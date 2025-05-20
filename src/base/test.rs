@@ -13,3 +13,11 @@ fn test_suspend() {
     let v = e.provide_left(|s: &str| Fx::immediate(s.len())).eval();
     assert_eq!(v, Some("hello".len()))
 }
+
+#[test]
+fn test_handler() {
+    let e = Fx::<&str, usize>::suspend("hello");
+    let handler = Fx::<&str, usize>::handler(|s: &str| Fx::immediate(s.len()));
+    let v = handler(e).eval();
+    assert_eq!(v, Some("hello".len()))
+}
