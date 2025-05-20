@@ -7,7 +7,7 @@ authors = ["Victor Borja <vborja@apache.org>"]
 repository = "https://github.com/vic/fx-rs"
 homepage = "https://vic.github.io/fx-rs"
 readme = "README.md"
-version = "0.1.0"
+version = "0.0.0-git"
 edition = "2024"
 
 [dependencies]
