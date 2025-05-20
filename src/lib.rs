@@ -1,4 +1,4 @@
-// #![feature(inherent_associated_types)]
+#![feature(inherent_associated_types)]
 
 mod base;
 mod core;

@@ -1,12 +1,18 @@
-use crate::{And, Fx, Handler};
+use crate::{And, Fx};
 use dyn_clone::{DynClone, clone_trait_object};
 
 impl<'f, I, S, O> ReqFx<'f, I, S, O>
 where
     O: Clone,
     S: 'f,
+    I: 'f,
 {
-    // type H = S;
+    pub type Handler = crate::Handler<'f, And<Self, S>, S, O, O>;
+    pub type Ability = And<Self::Handler, S>;
+    pub type Fx<V>
+        = crate::Fx<'f, Self::Ability, V>
+    where
+        V: Clone + 'f;
 
     pub fn suspend(i: I) -> Fx<'f, And<Self, S>, O>
     where
@@ -16,21 +22,21 @@ where
         Fx::ctx().flat_map(move |f: Self| f.apply(i))
     }
 
-    pub fn request(i: I) -> Fx<'f, And<Handler<'f, And<Self, S>, S, O, O>, S>, O>
+    pub fn request(i: I) -> Self::Fx<O>
     where
         I: Copy,
         S: Clone,
     {
-        Fx::ctx().flat_map(move |h: Handler<'f, And<Self, S>, S, O, O>| h.handle(ReqFx::suspend(i)))
+        Fx::ctx().flat_map(move |h: Self::Handler| h.handle(ReqFx::suspend(i)))
     }
 
-    pub fn handler<F>(f: F) -> Handler<'f, And<Self, S>, S, O, O>
+    pub fn handler<F>(f: F) -> Self::Handler
     where
         F: Fn(I) -> Fx<'f, S, O> + Copy + 'f,
         I: Clone,
         S: Clone,
     {
-        Handler::new(move |e| e.provide_left(Self::new(f)))
+        Self::Handler::new(move |e| e.provide_left(Self::new(f)))
     }
 
     pub fn new<F>(f: F) -> Self

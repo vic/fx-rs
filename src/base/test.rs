@@ -33,8 +33,8 @@ fn test_handle() {
 #[test]
 fn test_request_fx() {
     type StrLenReq<'f> = ReqFx<'f, &'f str, Nil, usize>;
-    let e = StrLenReq::request("hello");
-    let handler = StrLenReq::handler(|s: &str| Fx::pure(s.len()));
+    let e: StrLenReq::Fx<usize> = StrLenReq::request("hello");
+    let handler: StrLenReq::Handler = StrLenReq::handler(|s: &str| Fx::pure(s.len()));
     let v = e.provide_left(handler).eval();
     assert_eq!(v, Some("hello".len()))
 }
