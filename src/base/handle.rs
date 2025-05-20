@@ -26,10 +26,13 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         move |e| e.provide_left(f)
     }
 
-    /*
-
-    func Handle[F ~func(Fx[And[A, B], O]) Fx[B, O], A ~func(I) Fx[B, O], B, I, O any](i I) Fx[And[F, B], O] {
-        return Suspend[F](Suspend[A](i))
+    pub fn handle<F, A, B>(i: I) -> Fx<'f, And<F, B>, O>
+    where
+        F: Fn(Fx<'f, And<A, B>, O>) -> Fx<'f, B, O> + Clone,
+        A: Fn(I) -> Fx<'f, B, O> + Clone + 'f,
+        B: 'f,
+        I: Copy,
+    {
+        Fx::ctx().flat_map(move |f: F| f(Fx::suspend(i)))
     }
-         */
 }
