@@ -6,3 +6,5 @@ mod provide;
 
 #[cfg(test)]
 mod test;
+
+pub use handle::Handler;
