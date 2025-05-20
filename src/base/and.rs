@@ -20,8 +20,6 @@ impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
         A: Copy,
         B: Copy,
     {
-        Fx::halted()
-        // let e = self;
-        // Fx::pending(move |a: A| Fx::immediate(e.provide_left(a)))
+        Fx::pending(move |a: A| Fx::immediate(<Fx<'_, And<A, B>, V> as Clone>::clone(&self).provide_left(a)))
     }
 }
