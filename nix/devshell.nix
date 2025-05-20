@@ -44,19 +44,12 @@
           { package = pkgs.mdbook; }
         ];
 
-        devshell.packages =
-          let
-            zigcc = pkgs.writeShellApplication {
-              name = "cc";
-              text = ''exec ${pkgs.zig}/bin/zig cc "$@"'';
-            };
-          in
-          [
-            nightly
-            pkgs.cargo-tarpaulin
-            pkgs.mdbook
-            pkgs.gcc
-          ];
+        devshell.packages = [
+          nightly
+          pkgs.cargo-tarpaulin
+          pkgs.mdbook
+          pkgs.gcc
+        ];
       };
     };
 }
