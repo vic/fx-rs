@@ -14,7 +14,7 @@ where
     where
         V: Clone + 'f;
 
-    pub fn suspend(i: I) -> Fx<'f, And<Self, S>, O>
+    fn suspend(i: I) -> Fx<'f, And<Self, S>, O>
     where
         I: Copy,
         S: Clone,
