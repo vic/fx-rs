@@ -3,7 +3,7 @@ use super::{And, eff::Eff};
 #[derive(Copy, Clone)]
 pub struct Nil;
 
-pub struct Fx<'f, S: 'f, V: Clone + 'f>(Eff<'f, S, V>);
+pub struct Fx<'f, S, V: Clone>(Eff<'f, S, V>);
 
 impl<V: Clone> Fx<'_, Nil, V> {
     pub fn eval(self) -> Option<V> {
@@ -62,12 +62,8 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     }
 }
 
-impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
-    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V>
-    where
-        A: Clone,
-        B: Clone,
-    {
+impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, And<A, B>, V> {
+    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
             Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_left(ab.clone())),
@@ -75,11 +71,7 @@ impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
         }
     }
 
-    pub fn provide_left(self, a: A) -> Fx<'a, B, V>
-    where
-        A: Clone,
-        B: Clone,
-    {
+    pub fn provide_left(self, a: A) -> Fx<'a, B, V> {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
             Eff::Stopped(f) => Fx::stopped(move || f().provide_left(a.clone())),
@@ -91,7 +83,7 @@ impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
     }
 }
 
-impl<'f, S: 'f, V: Clone + 'f> Clone for Fx<'f, S, V> {
+impl<'f, S: 'f, V: Clone> Clone for Fx<'f, S, V> {
     fn clone(&self) -> Self {
         Fx(self.0.clone())
     }

@@ -1,12 +1,16 @@
 use super::Fx;
 use dyn_clone::{DynClone, clone_trait_object};
 
-pub enum Eff<'f, S: 'f, V: Clone + 'f> {
+pub enum Eff<'f, S, V: Clone> {
     Immediate(V),
     Pending(Continue<'f, S, V>),
     Stopped(Start<'f, S, V>),
 }
 
+type Continue<'f, S, V> = Box<dyn ContinueFn<'f, S, V>>;
+type Start<'f, S, V> = Box<dyn StartFn<'f, S, V>>;
+
+clone_trait_object!(<'f, S: 'f, V: Clone + 'f> ContinueFn<'f, S, V>);
 pub trait ContinueFn<'f, S: 'f, V: Clone + 'f>: DynClone + Fn(S) -> Fx<'f, S, V> + 'f {}
 
 impl<'f, S: 'f, V: Clone + 'f, F> ContinueFn<'f, S, V> for F where
@@ -14,16 +18,10 @@ impl<'f, S: 'f, V: Clone + 'f, F> ContinueFn<'f, S, V> for F where
 {
 }
 
-clone_trait_object!(<'f, S: 'f, V: Clone + 'f> ContinueFn<'f, S, V>);
-
-type Continue<'f, S, V> = Box<dyn ContinueFn<'f, S, V>>;
-
+clone_trait_object!(<'f, S: 'f, V: Clone + 'f> StartFn<'f, S, V>);
 pub trait StartFn<'f, S: 'f, V: Clone + 'f>: DynClone + Fn() -> Fx<'f, S, V> + 'f {}
 
 impl<'f, S: 'f, V: Clone + 'f, F> StartFn<'f, S, V> for F where F: Fn() -> Fx<'f, S, V> + Clone + 'f {}
-
-clone_trait_object!(<'f, S: 'f, V: Clone + 'f> StartFn<'f, S, V>);
-type Start<'f, S, V> = Box<dyn StartFn<'f, S, V>>;
 
 impl<'f, S: 'f, V: Clone + 'f> Clone for Eff<'f, S, V> {
     fn clone(&self) -> Self {
