@@ -7,7 +7,7 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         I: Copy + 'f,
         F: Fn(I) -> O + Clone,
     {
-        Fx::map(Fx::ctx(), move |f: F| f(i))
+        Fx::ctx().map(move |f: F| f(i))
     }
 
     pub fn suspend<F, B>(i: I) -> Fx<'f, And<F, B>, O>
@@ -16,7 +16,7 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         B: 'f,
         F: Fn(I) -> Fx<'f, B, O> + Clone,
     {
-        Fx::and_flat(Fx::apply(i))
+        Fx::ctx().flat_map(move |f: F| f(i))
     }
 
     pub fn handler<F, B>(f: F) -> Handler<'f, And<F, B>, B, O, O>
