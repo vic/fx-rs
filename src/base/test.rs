@@ -1,7 +1,7 @@
 use crate::Fx;
 
 #[test]
-fn ctx_fn_apply() {
+fn test_apply_ctx_fn() {
     let e = Fx::<&str, usize>::apply("hello");
     let v = e.provide(|s: &str| s.len()).eval();
     assert_eq!(v, Some("hello".len()))

@@ -24,7 +24,7 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
         B: Copy + 'f,
         F: Fn(I) -> Fx<'f, B, O> + Copy + 'f,
     {
-        Handler(Box::new(move |e| e.provide_left(f)))
+        Handler::new(move |e| e.provide_left(f))
     }
 
     pub fn handle<F, B>(i: I) -> Fx<'f, And<Handler<'f, And<F, B>, B, O, O>, B>, O>
@@ -40,6 +40,13 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
 #[derive(Clone)]
 pub struct Handler<'f, A, B, U: Clone, V: Clone>(Box<dyn HandlerFn<'f, A, B, U, V> + 'f>);
 impl<'f, A, B, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
+    pub fn new<F>(f: F) -> Self
+    where
+        F: Fn(Fx<'f, A, U>) -> Fx<'f, B, V> + Clone + 'f,
+    {
+        Handler(Box::new(f))
+    }
+
     pub fn handle(&self, e: Fx<'f, A, U>) -> Fx<'f, B, V> {
         self.0(e)
     }
