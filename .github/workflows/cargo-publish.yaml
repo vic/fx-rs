@@ -8,6 +8,7 @@ jobs:
     # if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
+      - uses: cachix/install-nix-action@v30
       - uses: actions/checkout@v4
       - name: Set Cargo.toml version
         env:
@@ -19,5 +20,5 @@ jobs:
           sed "s/0\\.0\\.0-git/${RELEASE_TAG##*\/v}/" Cargo.lock.orig >Cargo.lock
           rm *.orig
           grep version Cargo.toml
-      - run: echo -n "${{secrets.CARGO_REGISTRY_TOKEN}}" | cargo login
-      - run: cargo publish --allow-dirty
+      - run: echo -n "${{secrets.CARGO_REGISTRY_TOKEN}}" | nix develop -c cargo login
+      - run: nix develop -c cargo publish --allow-dirty

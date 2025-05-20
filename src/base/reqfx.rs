@@ -1,3 +1,4 @@
+
 use crate::{And, Fx, Handler};
 use dyn_clone::{DynClone, clone_trait_object};
 
@@ -6,6 +7,8 @@ where
     O: Clone,
     S: 'f,
 {
+    // type H = S;
+
     pub fn suspend(i: I) -> Fx<'f, And<Self, S>, O>
     where
         I: Copy,

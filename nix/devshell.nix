@@ -4,6 +4,16 @@
 
   perSystem =
     { pkgs, ... }:
+    let
+      fenix = inputs.fenix.packages.${pkgs.system};
+      nightly = fenix.latest.withComponents [
+        "cargo"
+        "rust-src"
+        "rustc"
+        "rustfmt"
+        "rust-analyzer"
+      ];
+    in
     {
       devshells.default = {
         commands = [
@@ -31,7 +41,6 @@
             command = "cargo test";
           }
 
-          { package = pkgs.cargo; }
           { package = pkgs.mdbook; }
         ];
 
@@ -43,12 +52,10 @@
             };
           in
           [
-            pkgs.cargo
-            pkgs.rustfmt
-            pkgs.rust-analyzer
+            nightly
             pkgs.cargo-tarpaulin
             pkgs.mdbook
-            zigcc
+            pkgs.gcc
           ];
       };
     };
