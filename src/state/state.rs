@@ -1,6 +1,6 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
-use crate::{And, Cap, Fx, Handler};
+use crate::{Ability, And, Fx, Handler};
 
 #[derive(Clone)]
 pub struct State<T>(Rc<RefCell<T>>);
@@ -19,24 +19,28 @@ impl<'f, T> State<T> {
     }
 }
 
-pub type Read<'f, T> = Cap<'f, (), State<T>, T>;
+pub struct Read<'f, T: Clone>(PhantomData<ReadCap<'f, T>>);
+type ReadCap<'f, T> = Ability<'f, (), State<T>, T>;
+
 impl<'f, T: Clone> Read<'f, T> {
-    pub fn read() -> Fx<'f, And<Self, State<T>>, T> {
-        Self::request(())
+    pub fn read() -> Fx<'f, And<ReadCap<'f, T>, State<T>>, T> {
+        ReadCap::request(())
     }
 
-    pub fn reader<B: Clone, V: Clone>() -> Handler<'f, And<Self, B>, B, V, V> {
-        Self::new_handler(|_| Fx::func(|s: State<T>| s.0.borrow().clone()))
+    pub fn handler<B: Clone, V: Clone>() -> Handler<'f, And<ReadCap<'f, T>, B>, B, V, V> {
+        ReadCap::handler(|_| Fx::func(|s: State<T>| s.0.borrow().clone()))
     }
 }
 
-pub type Write<'f, T> = Cap<'f, T, State<T>, ()>;
+pub struct Write<'f, T: Clone>(PhantomData<WriteCap<'f, T>>);
+type WriteCap<'f, T> = Ability<'f, T, State<T>, ()>;
+
 impl<'f, T: Copy> Write<'f, T> {
-    pub fn write(value: T) -> Fx<'f, And<Self, State<T>>, ()> {
-        Self::request(value)
+    pub fn write(value: T) -> Fx<'f, And<WriteCap<'f, T>, State<T>>, ()> {
+        WriteCap::request(value)
     }
 
-    pub fn writer() -> Handler<'f, And<Self, State<T>>, State<T>, (), ()> {
-        Self::new_handler(|v: T| Fx::func(move |s: State<T>| s.0.borrow_mut().clone_from(&v)))
+    pub fn handler() -> Handler<'f, And<WriteCap<'f, T>, State<T>>, State<T>, (), ()> {
+        WriteCap::handler(|v: T| Fx::func(move |s: State<T>| s.0.borrow_mut().clone_from(&v)))
     }
 }

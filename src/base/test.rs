@@ -1,4 +1,4 @@
-use crate::{Cap, Fx, Nil};
+use crate::{Ability, Fx, Nil};
 
 #[test]
 fn test_apply_ctx_fn() {
@@ -9,9 +9,9 @@ fn test_apply_ctx_fn() {
 
 #[test]
 fn test_request_fx() {
-    type StrLenReq<'f> = Cap<'f, &'f str, Nil, usize>;
+    type StrLenReq<'f> = Ability<'f, &'f str, Nil, usize>;
     let e = StrLenReq::request("hello");
-    let handler = StrLenReq::new_handler(|s: &str| Fx::pure(s.len()));
+    let handler = StrLenReq::handler(|s: &str| Fx::pure(s.len()));
     let v = e.handle_left(handler).eval();
     assert_eq!(v, Some("hello".len()))
 }

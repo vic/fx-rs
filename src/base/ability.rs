@@ -1,7 +1,7 @@
 use crate::{And, Fx, Handler};
 use dyn_clone::{DynClone, clone_trait_object};
 
-impl<'f, I, S, O> Cap<'f, I, S, O>
+impl<'f, I, S, O> Ability<'f, I, S, O>
 where
     O: Clone,
     S: Clone + 'f,
@@ -14,7 +14,7 @@ where
         Fx::ctx().flat_map(move |f: Self| f.apply(i))
     }
 
-    pub fn new_handler<F, B, V>(f: F) -> Handler<'f, And<Self, B>, B, V, V>
+    pub fn handler<F, B, V>(f: F) -> Handler<'f, And<Self, B>, B, V, V>
     where
         F: Fn(I) -> Fx<'f, S, O> + Copy + 'f,
         B: Clone,
@@ -40,7 +40,7 @@ where
 }
 
 #[derive(Clone)]
-pub struct Cap<'f, I, S, O: Clone>(Box<dyn CapFn<'f, I, S, O> + 'f>);
+pub struct Ability<'f, I, S, O: Clone>(Box<dyn CapFn<'f, I, S, O> + 'f>);
 
 clone_trait_object!(<'f, I, S, O: Clone> CapFn<'f, I, S, O>);
 

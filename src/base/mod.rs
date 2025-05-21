@@ -1,5 +1,5 @@
+mod ability;
 mod and;
-mod cap;
 mod fx;
 mod handle;
 mod handler;
@@ -9,5 +9,5 @@ mod provide;
 #[cfg(test)]
 mod test;
 
-pub use cap::Cap;
+pub use ability::Ability;
 pub use handler::Handler;

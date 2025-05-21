@@ -5,7 +5,7 @@ fn handle_read() {
     let e = Read::read().map(|v: usize| v.to_string());
 
     let state = State::<usize>::handler(10);
-    let reader = Read::<usize>::reader();
+    let reader = Read::<usize>::handler();
 
     let v = e.handle_left(reader).and_nil().handle_left(state).eval();
 
@@ -17,7 +17,7 @@ fn handle_write() {
     let e = Write::write(99);
 
     let state = State::<usize>::handler(10);
-    let writer = Write::<usize>::writer();
+    let writer = Write::<usize>::handler();
 
     let v = e.handle_left(writer).and_nil().handle_left(state).eval();
 
