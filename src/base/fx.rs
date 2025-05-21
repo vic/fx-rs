@@ -40,4 +40,19 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn halted() -> Fx<'f, S, V> {
         Fx::stopped(|| Fx::func(|_: S| -> V { panic!("tried to use halted effect.") }))
     }
+
+    pub fn via<F, T, U>(self, f: F) -> Fx<'f, T, U>
+    where
+        F: Fn(Self) -> Fx<'f, T, U>,
+        U: Clone,
+    {
+        f(self)
+    }
+
+    pub fn via_box<F, T, U>(self, f: Box<dyn Fn(Self) -> Fx<'f, T, U> + 'f>) -> Fx<'f, T, U>
+    where
+        U: Clone,
+    {
+        f(self)
+    }
 }

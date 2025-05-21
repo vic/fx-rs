@@ -1,8 +1,6 @@
-#![feature(inherent_associated_types)]
-
 mod base;
 mod core;
-pub mod rw;
+pub mod state;
 
-pub use base::{Handler, ReqFx};
+pub use base::{Cap, Handler};
 pub use core::{And, Fx, Nil};

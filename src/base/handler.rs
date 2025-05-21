@@ -12,6 +12,10 @@ impl<'f, A, B, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
     pub fn handle(&self, e: Fx<'f, A, U>) -> Fx<'f, B, V> {
         self.0(e)
     }
+
+    pub fn clone_boxed(&self) -> Box<dyn Fn(Fx<'f, A, U>) -> Fx<'f, B, V> + 'f> {
+        self.0.clone()
+    }
 }
 
 #[derive(Clone)]

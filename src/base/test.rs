@@ -1,4 +1,4 @@
-use crate::{Fx, Nil, ReqFx};
+use crate::{Cap, Fx, Nil};
 
 #[test]
 fn test_apply_ctx_fn() {
@@ -8,33 +8,10 @@ fn test_apply_ctx_fn() {
 }
 
 #[test]
-fn test_request() {
-    let e = Fx::request("hello");
-    let v = e.provide_left(|s: &str| Fx::pure(s.len())).eval();
-    assert_eq!(v, Some("hello".len()))
-}
-
-#[test]
-fn test_handler() {
-    let e = Fx::request("hello");
-    let handler = Fx::handler(|s: &str| Fx::pure(s.len()));
-    let v = handler.handle(e).eval();
-    assert_eq!(v, Some("hello".len()))
-}
-
-#[test]
-fn test_handle() {
-    let e = Fx::handle("hello");
-    let handler = Fx::handler(|s: &str| Fx::pure(s.len()));
-    let v = e.provide_left(handler).eval();
-    assert_eq!(v, Some("hello".len()))
-}
-
-#[test]
 fn test_request_fx() {
-    type StrLenReq<'f> = ReqFx<'f, &'f str, Nil, usize>;
-    let e: StrLenReq::Fx<usize> = StrLenReq::request("hello");
-    let handler: StrLenReq::Handler = StrLenReq::handler(|s: &str| Fx::pure(s.len()));
-    let v = e.provide_left(handler).eval();
+    type StrLenReq<'f> = Cap<'f, &'f str, Nil, usize>;
+    let e = StrLenReq::request("hello");
+    let handler = StrLenReq::new_handler(|s: &str| Fx::pure(s.len()));
+    let v = e.handle_left(handler).eval();
     assert_eq!(v, Some("hello".len()))
 }

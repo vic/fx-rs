@@ -4,7 +4,8 @@
     { pkgs, ... }:
     let
       fenix = inputs.fenix.packages.${pkgs.system};
-      nightly = fenix.latest.withComponents [
+      channel = fenix.stable;
+      toolchain = channel.withComponents [
         "cargo"
         "rust-src"
         "rustc"
@@ -13,8 +14,8 @@
       ];
     in
     {
-      packages.rust-toolchain = nightly // {
-        inherit (fenix.latest) rustfmt;
+      packages.rust-toolchain = toolchain // {
+        inherit (channel) rustfmt;
       };
     };
 }
