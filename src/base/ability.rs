@@ -1,6 +1,16 @@
 use crate::{And, Fx, Handler};
 use dyn_clone::{DynClone, clone_trait_object};
 
+impl<'f, I, O: Clone> Fx<'f, I, O> {
+    pub fn apply<F>(i: I) -> Fx<'f, F, O>
+    where
+        I: Copy + 'f,
+        F: Fn(I) -> O + Clone,
+    {
+        Fx::ctx().map(move |f: F| f(i))
+    }
+}
+
 impl<'f, I, S, O> Ability<'f, I, S, O>
 where
     O: Clone,

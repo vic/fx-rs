@@ -34,15 +34,17 @@ impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
         self.then(And::<B, A>::swap, Fx::immediate)
     }
 
-    pub fn and_flat(e: Fx<'a, A, Fx<'a, B, V>>) -> Self {
-        e.flat_map(|v| v)
-    }
-
     pub fn and_nest(self) -> Fx<'a, A, Fx<'a, B, V>>
     where
         A: Clone,
         B: Clone,
     {
         Fx::pending(move |a: A| Fx::immediate((&self).clone().provide_left(a)))
+    }
+}
+
+impl<'a, A, B, V: Clone> Fx<'a, A, Fx<'a, B, V>> {
+    pub fn and_flat(self) -> Fx<'a, And<A, B>, V> {
+        self.flat_map(|v| v)
     }
 }

@@ -1,6 +1,6 @@
 mod state;
 
-pub use state::{Read, State, Write};
+pub use state::{RcRead, RcState, RcWrite};
 
 #[cfg(test)]
 mod test;

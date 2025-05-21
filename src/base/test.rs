@@ -12,6 +12,6 @@ fn test_request_fx() {
     type StrLenReq<'f> = Ability<'f, &'f str, Nil, usize>;
     let e = StrLenReq::request("hello");
     let handler = StrLenReq::handler(|s: &str| Fx::pure(s.len()));
-    let v = e.handle_left(handler).eval();
+    let v = e.handle(handler).eval();
     assert_eq!(v, Some("hello".len()))
 }

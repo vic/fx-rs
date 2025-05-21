@@ -48,11 +48,4 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     {
         f(self)
     }
-
-    pub fn via_box<F, T, U>(self, f: Box<dyn Fn(Self) -> Fx<'f, T, U> + 'f>) -> Fx<'f, T, U>
-    where
-        U: Clone,
-    {
-        f(self)
-    }
 }
