@@ -14,4 +14,7 @@ impl<A, B> And<A, B> {
     pub fn right(self) -> B {
         self.1
     }
+    pub fn tuple(self) -> (A, B) {
+        (self.0, self.1)
+    }
 }

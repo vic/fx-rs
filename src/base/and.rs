@@ -5,8 +5,15 @@ impl<'a, S, V: Clone> Fx<'a, S, V> {
         self.then(And::left, Fx::immediate)
     }
 
-    pub fn to_env(self) -> Fx<'a, And<S, V>, ()> {
+    pub fn into_env(self) -> Fx<'a, And<S, V>, ()> {
         self.flat_map(|v| Fx::func(|_: And<V, V>| ()).provide_left(v))
+    }
+
+    pub fn with_env(self) -> Fx<'a, S, (S, V)>
+    where
+        S: Clone,
+    {
+        self.map_m(|v| Fx::func(|s: And<V, S>| s.swap().tuple()).provide_left(v))
     }
 }
 
@@ -37,15 +44,5 @@ impl<'a, A, B, V: Clone> Fx<'a, And<A, B>, V> {
         B: Clone,
     {
         Fx::pending(move |a: A| Fx::immediate((&self).clone().provide_left(a)))
-    }
-
-    pub fn left_down(self) -> Fx<'a, And<A, B>, (A, V)>
-    where
-        A: Clone,
-        B: Clone,
-    {
-        self.map_m(|v| {
-            Fx::func(|n: And<V, And<A, B>>| (n.clone().right().left(), n.left())).provide_left(v)
-        })
     }
 }

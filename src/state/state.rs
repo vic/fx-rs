@@ -12,8 +12,8 @@ impl<'f, T> State<T> {
         B: Clone,
     {
         Handler::new(move |e: Fx<'f, And<Self, B>, O>| {
-            e.left_down()
-                .map(|(s, o)| (o, s.0.borrow().clone()))
+            e.with_env()
+                .map(|(s, o)| (o, s.left().0.borrow().clone()))
                 .provide_left(Self(Rc::new(RefCell::new(t))))
         })
     }
