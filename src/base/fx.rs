@@ -32,7 +32,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 
     pub fn restart<F>(self, f: F) -> Self
     where
-        F: Fn() -> Self + Copy + 'f,
+        F: Fn() -> Self + Clone + 'f,
     {
         self.start(move |_| f())
     }

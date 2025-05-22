@@ -39,25 +39,25 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 
     pub fn start<F>(self, r: F) -> Self
     where
-        F: Fn(Self) -> Self + Copy + 'f,
+        F: Fn(Self) -> Self + Clone + 'f,
     {
         match self.0 {
             Eff::Stopped(f) => r(f()),
             Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Pending(f) => Fx::pending(move |s: S| f(s).start(r)),
+            Eff::Pending(f) => Fx::pending(move |s: S| f(s).start(r.clone())),
         }
     }
 
     pub fn then<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
         U: Clone,
-        C: Fn(T) -> S + Copy + 'f,
-        F: Fn(V) -> Fx<'f, T, U> + Copy + 'f,
+        C: Fn(T) -> S + Clone + 'f,
+        F: Fn(V) -> Fx<'f, T, U> + Clone + 'f,
     {
         match self.0 {
             Eff::Immediate(v) => fmap(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().then(cmap, fmap)),
-            Eff::Pending(f) => Fx::pending(move |t: T| f(cmap(t)).then(cmap, fmap)),
+            Eff::Stopped(f) => Fx::stopped(move || f().then(cmap.clone(), fmap.clone())),
+            Eff::Pending(f) => Fx::pending(move |t: T| f(cmap(t)).then(cmap.clone(), fmap.clone())),
         }
     }
 }

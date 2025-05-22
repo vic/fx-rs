@@ -4,10 +4,10 @@ use dyn_clone::{DynClone, clone_trait_object};
 impl<'f, I, O: Clone> Fx<'f, I, O> {
     pub fn apply<F>(i: I) -> Fx<'f, F, O>
     where
-        I: Copy + 'f,
+        I: Clone + 'f,
         F: Fn(I) -> O + Clone,
     {
-        Fx::ctx().map(move |f: F| f(i))
+        Fx::ctx().map(move |f: F| f(i.clone()))
     }
 }
 
@@ -19,18 +19,18 @@ where
 {
     pub fn request(i: I) -> Fx<'f, And<Self, S>, O>
     where
-        I: Copy,
+        I: Clone,
     {
-        Fx::ctx().flat_map(move |f: Self| f.apply(i))
+        Fx::ctx().flat_map(move |f: Self| f.apply(i.clone()))
     }
 
     pub fn handler<F, B, V>(f: F) -> Handler<'f, And<Self, B>, B, V, V>
     where
-        F: Fn(I) -> Fx<'f, S, O> + Copy + 'f,
+        F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
         B: Clone,
         V: Clone,
     {
-        Handler::new(move |e: Fx<'f, And<Self, B>, V>| e.provide_left(Self::new(f)))
+        Handler::new(move |e: Fx<'f, And<Self, B>, V>| e.provide_left(Self::new(f.clone())))
     }
 
     fn new<F>(f: F) -> Self

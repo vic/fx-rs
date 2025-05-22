@@ -1,41 +1,40 @@
-use crate::state::RcState;
+use crate::state::State;
 
-type RcUsize = RcState<usize>;
+type StUsize<'f> = State<'f, usize>;
 
 #[test]
 fn test_read() {
-    let e = RcUsize::read().map(|v: usize| v.to_string());
-    let state = RcUsize::state_handler(10);
-    let reader = RcUsize::read_handler();
+    let e = StUsize::read().map(|v: usize| v.to_string());
+    let state = StUsize::rc_handler(10);
+    let reader = StUsize::reader();
     let v = e.handle(reader).and_nil().handle(state).eval();
     assert_eq!(v, Some(("10".to_owned(), 10)));
 }
 
 #[test]
 fn test_write() {
-    let e = RcUsize::write(99);
-    let state = RcUsize::state_handler(10);
-    let writer = RcUsize::write_handler();
+    let e = StUsize::write(99);
+    let state = StUsize::rc_handler(10);
+    let writer = StUsize::writer();
     let v = e.handle(writer).and_nil().handle(state).eval();
     assert_eq!(v, Some(((), 99)));
 }
 
 #[test]
 fn test_read_write() {
-    let e = RcUsize::read()
+    let e = StUsize::read()
         .map(|v: usize| v.to_string().chars().rev().collect())
-        .flat_map(|s: String| RcUsize::write(s.parse::<usize>().unwrap_or(99)));
+        .flat_map(|s: String| StUsize::write(s.parse::<usize>().unwrap_or(99)));
 
-    // A handler is a transformation over an effect Fx<A, U> => Fx<B, V>.
-    let reader = RcUsize::read_handler(); // Fx<Reader<St>, _> => Fx<St, _>
-    let writer = RcUsize::write_handler(); // Fx<Writer<St>, _> => Fx<St, _>
-    let state = RcUsize::state_handler(12); // Fx<St, _> => Fx<Nil, (_, S)>
+    let reader = StUsize::reader();
+    let writer = StUsize::writer();
+    let state = StUsize::rc_handler(12);
 
-    let v = e // e is: Fx<And<Reader<St>, Writer<St>>, (Unit, usize)>
+    let v = e
         .handle(reader.on_left())
         .handle(writer.on_right())
-        .and_collapse() // Fx<And<St, St>, _> => Fx<St, _>
-        .and_nil() // Fx<St, _> => Fx<And<St, Nil>, _>
+        .and_collapse()
+        .and_nil()
         .handle(state)
         .eval();
 
