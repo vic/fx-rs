@@ -1,4 +1,4 @@
-use crate::{And, Fx, Handler};
+use crate::{Fx, Handler};
 use dyn_clone::{DynClone, clone_trait_object};
 
 impl<'f, I, O: Clone> Fx<'f, I, O> {
@@ -17,20 +17,20 @@ where
     S: Clone + 'f,
     I: Clone + 'f,
 {
-    pub fn request(i: I) -> Fx<'f, And<Self, S>, O>
+    pub fn request(i: I) -> Fx<'f, (Self, S), O>
     where
         I: Clone,
     {
         Fx::ctx().flat_map(move |f: Self| f.apply(i.clone()))
     }
 
-    pub fn handler<F, B, V>(f: F) -> Handler<'f, And<Self, B>, B, V, V>
+    pub fn handler<F, B, V>(f: F) -> Handler<'f, (Self, B), B, V, V>
     where
         F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
         B: Clone,
         V: Clone,
     {
-        Handler::new(move |e: Fx<'f, And<Self, B>, V>| e.provide_left(Self::new(f.clone())))
+        Handler::new(move |e: Fx<'f, (Self, B), V>| e.provide_left(Self::new(f.clone())))
     }
 
     fn new<F>(f: F) -> Self

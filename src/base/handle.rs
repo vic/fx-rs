@@ -1,4 +1,4 @@
-use crate::{And, Fx, Handler};
+use crate::{Fx, Handler};
 
 impl<'f, A, V: Clone> Fx<'f, A, V> {
     pub fn handle<B, U: Clone>(self, handler: Handler<'f, A, B, V, U>) -> Fx<'f, B, U> {
@@ -7,11 +7,11 @@ impl<'f, A, V: Clone> Fx<'f, A, V> {
 }
 
 impl<'f, A: Clone, B: Clone, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
-    pub fn on_left<S: Clone>(self) -> Handler<'f, And<A, S>, And<B, S>, U, V> {
+    pub fn on_left<S: Clone>(self) -> Handler<'f, (A, S), (B, S), U, V> {
         Handler::new(move |e| e.and_swap().handle(self.clone().on_right()).and_swap())
     }
 
-    pub fn on_right<S: Clone>(self) -> Handler<'f, And<S, A>, And<S, B>, U, V> {
+    pub fn on_right<S: Clone>(self) -> Handler<'f, (S, A), (S, B), U, V> {
         Handler::new(move |e| e.and_nest().handle(self.clone().on_value()).and_flat())
     }
 

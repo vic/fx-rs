@@ -1,4 +1,4 @@
-use super::{And, eff::Eff};
+use super::eff::Eff;
 
 #[derive(Copy, Clone)]
 pub struct Nil;
@@ -62,8 +62,8 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     }
 }
 
-impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, And<A, B>, V> {
-    fn rec_provide_left(self, ab: And<A, B>) -> Fx<'a, B, V> {
+impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, (A, B), V> {
+    fn rec_provide_left(self, ab: (A, B)) -> Fx<'a, B, V> {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
             Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_left(ab.clone())),
@@ -76,7 +76,7 @@ impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, And<A, B>, V> {
             Eff::Immediate(v) => Fx::immediate(v),
             Eff::Stopped(f) => Fx::stopped(move || f().provide_left(a.clone())),
             Eff::Pending(f) => Fx::pending(move |b: B| {
-                let ab = And::new(a.clone(), b);
+                let ab = (a.clone(), b);
                 f(ab.clone()).rec_provide_left(ab)
             }),
         }
