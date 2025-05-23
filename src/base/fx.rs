@@ -48,4 +48,12 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     {
         f(self)
     }
+
+    pub fn unit(self) -> Fx<'f, S, ()> {
+        self.constant(())
+    }
+
+    pub fn constant<U: Clone>(self, v: U) -> Fx<'f, S, U> {
+        self.map(move |_| v.clone())
+    }
 }

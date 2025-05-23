@@ -36,7 +36,7 @@ impl<'f, T: Clone> State<'f, T> {
     {
         Handler::new(move |e: Fx<'f, And<Self, B>, O>| {
             let s = State(Box::new(RcState(Rc::new(RefCell::new(t.clone())))));
-            e.with_env()
+            e.from_env()
                 .map(|(n, o)| (o, n.left().0.read()))
                 .provide_left(s)
         })

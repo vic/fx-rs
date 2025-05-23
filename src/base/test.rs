@@ -29,3 +29,28 @@ fn test_request_fx() {
     let v = e.handle(handler).eval();
     assert_eq!(v, Some("hello".len()))
 }
+
+#[test]
+fn contramap() {
+    let e = Fx::func(|v: usize| v.to_string())
+        .from_env()
+        .contra_map(|n: usize| n * 2)
+        .provide(10)
+        .eval();
+    assert_eq!(e, Some((20, "20".to_owned())))
+}
+
+#[test]
+fn test_env() {
+    let e = Fx::func(|n: usize| n.to_string())
+        .into_env()
+        .provide_left(20)
+        .contra_map(|s: String| s.chars().rev().collect())
+        .from_env()
+        .provide("boom".to_owned())
+        .eval();
+    assert_eq!(
+        e,
+        Some(("boom".to_owned(), ("20".to_owned(), "moob".to_owned())))
+    )
+}

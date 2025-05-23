@@ -5,11 +5,11 @@ impl<'a, S, V: Clone> Fx<'a, S, V> {
         self.then(And::left, Fx::immediate)
     }
 
-    pub fn into_env(self) -> Fx<'a, And<S, V>, ()> {
-        self.flat_map(|v| Fx::func(|_: And<V, V>| ()).provide_left(v))
+    pub fn into_env(self) -> Fx<'a, And<S, V>, (V, V)> {
+        self.flat_map(|v| Fx::func(|n: And<V, V>| n.tuple()).provide_left(v))
     }
 
-    pub fn with_env(self) -> Fx<'a, S, (S, V)>
+    pub fn from_env(self) -> Fx<'a, S, (S, V)>
     where
         S: Clone,
     {
