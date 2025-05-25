@@ -3,7 +3,17 @@ use super::eff::Eff;
 #[derive(Copy, Clone)]
 pub struct Nil;
 
-pub struct Fx<'f, S, V: Clone>(Eff<'f, S, V>);
+pub struct Fx<'f, S, V: Clone>(pub(super) Eff<'f, S, V>);
+
+impl<'f, S, V, F> From<F> for Fx<'f, S, V>
+where
+    V: Clone,
+    F: Fn(S) -> V + Clone + 'f,
+{
+    fn from(f: F) -> Self {
+        Fx::func(f)
+    }
+}
 
 impl<V: Clone> Fx<'_, Nil, V> {
     pub fn eval(self) -> Option<V> {
@@ -58,32 +68,6 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
             Eff::Immediate(v) => fmap(v),
             Eff::Stopped(f) => Fx::stopped(move || f().then(cmap.clone(), fmap.clone())),
             Eff::Pending(f) => Fx::pending(move |t: T| f(cmap(t)).then(cmap.clone(), fmap.clone())),
-        }
-    }
-}
-
-impl<'a, AB: Clone, V: Clone> Fx<'a, AB, V> {
-    fn rec_provide_part<B>(self, ab: AB) -> Fx<'a, B, V> {
-        match self.0 {
-            Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_part(ab.clone())),
-            Eff::Pending(f) => f(ab.clone()).rec_provide_part(ab),
-        }
-    }
-
-    pub fn provide_part<A, B, F>(self, a: A, compose: F) -> Fx<'a, B, V>
-    where
-        F: Fn(A, B) -> AB + Clone + 'a,
-        A: Clone + 'a,
-        B: Clone + 'a,
-    {
-        match self.0 {
-            Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().provide_part(a.clone(), compose.clone())),
-            Eff::Pending(f) => Fx::pending(move |b: B| {
-                let ab = compose(a.clone(), b);
-                f(ab.clone()).rec_provide_part(ab)
-            }),
         }
     }
 }

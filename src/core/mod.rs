@@ -1,5 +1,6 @@
 mod eff;
 mod fx;
+mod provide;
 
 #[cfg(test)]
 mod test;

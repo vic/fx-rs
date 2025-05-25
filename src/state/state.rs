@@ -55,7 +55,7 @@ impl<'f, T: Clone> State<'f, T> {
         Write::request(value)
     }
 
-    pub fn writer() -> Handler<'f, (Write<'f, T>, State<'f, T>), State<'f, T>, (), ()> {
+    pub fn writer<B: Clone>() -> Handler<'f, (Write<'f, T>, B), B, (), ()> {
         Write::handler(|v: T| Fx::func(move |s: State<'f, T>| s.0.write(v.clone())))
     }
 }

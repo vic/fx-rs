@@ -1,4 +1,5 @@
 use crate::Fx;
+use std::convert::identity;
 
 impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn contra_map<T, F>(self, cmap: F) -> Fx<'f, T, V>
@@ -21,7 +22,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         U: Clone,
         F: Fn(V) -> Fx<'f, S, U> + Clone + 'f,
     {
-        self.then(|c| c, f)
+        self.then(identity, f)
     }
 
     pub fn flat_map<F, T, U>(self, f: F) -> Fx<'f, (S, T), U>
@@ -29,9 +30,6 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         U: Clone,
         F: Fn(V) -> Fx<'f, T, U> + Clone + 'f,
     {
-        self.then(
-            |n: (S, T)| n.0,
-            move |v| f(v).then(|n: (S, T)| n.1, Fx::immediate),
-        )
+        self.then(|(s, _)| s, move |v| f(v).contra_map(|(_, t)| t))
     }
 }
