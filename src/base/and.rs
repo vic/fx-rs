@@ -30,6 +30,14 @@ impl<'a, S: Clone, B: Clone, V: Clone> Fx<'a, ((S, B), S), V> {
 }
 
 impl<'a, A, B, V: Clone> Fx<'a, (A, B), V> {
+    pub fn provide_left(self, a: A) -> Fx<'a, B, V>
+    where
+        A: Clone,
+        B: Clone,
+    {
+        self.provide_one(a, |a, b| (a, b))
+    }
+
     pub fn and_swap(self) -> Fx<'a, (B, A), V> {
         self.then(|n: (B, A)| (n.1, n.0), Fx::immediate)
     }
