@@ -35,7 +35,7 @@ impl<'a, A, B, V: Clone> Fx<'a, (A, B), V> {
         A: Clone,
         B: Clone,
     {
-        self.provide_one(a, |a, b| (a, b))
+        self.provide_part(a, |a, b| (a, b))
     }
 
     pub fn and_swap(self) -> Fx<'a, (B, A), V> {

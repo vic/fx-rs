@@ -63,15 +63,15 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 }
 
 impl<'a, AB: Clone, V: Clone> Fx<'a, AB, V> {
-    fn rec_provide_one<B>(self, ab: AB) -> Fx<'a, B, V> {
+    fn rec_provide_part<B>(self, ab: AB) -> Fx<'a, B, V> {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_one(ab.clone())),
-            Eff::Pending(f) => f(ab.clone()).rec_provide_one(ab),
+            Eff::Stopped(f) => Fx::stopped(move || f().rec_provide_part(ab.clone())),
+            Eff::Pending(f) => f(ab.clone()).rec_provide_part(ab),
         }
     }
 
-    pub fn provide_one<A, B, F>(self, a: A, both: F) -> Fx<'a, B, V>
+    pub fn provide_part<A, B, F>(self, a: A, compose: F) -> Fx<'a, B, V>
     where
         F: Fn(A, B) -> AB + Clone + 'a,
         A: Clone + 'a,
@@ -79,10 +79,10 @@ impl<'a, AB: Clone, V: Clone> Fx<'a, AB, V> {
     {
         match self.0 {
             Eff::Immediate(v) => Fx::immediate(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().provide_one(a.clone(), both.clone())),
+            Eff::Stopped(f) => Fx::stopped(move || f().provide_part(a.clone(), compose.clone())),
             Eff::Pending(f) => Fx::pending(move |b: B| {
-                let ab = both(a.clone(), b);
-                f(ab.clone()).rec_provide_one(ab)
+                let ab = compose(a.clone(), b);
+                f(ab.clone()).rec_provide_part(ab)
             }),
         }
     }
