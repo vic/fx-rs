@@ -1,7 +1,7 @@
-use crate::Fx;
+use crate::{Ability, Fx};
 
 #[derive(Clone)]
-pub enum Acc<T> {
+pub enum Item<T> {
     Next(T),
     Done(T),
 }
@@ -22,16 +22,23 @@ impl<'f, I: Clone, S: Clone> Stream<'f, I, S> {
     pub fn cons(head: I, tail: StreamFx<'f, I, S>) -> StreamFx<'f, I, S> {
         Fx::immediate(Self::Cons(head, Box::new(tail)))
     }
+
     pub fn once(i: I) -> StreamFx<'f, I, S> {
         Fx::immediate(Self::Cons(i, Box::new(Self::empty())))
     }
+
+    pub fn emit(i: Item<I>) -> Fx<'f, (EmitCap<'f, Item<I>, S>, S), ()> {
+        EmitCap::request(i)
+    }
 }
 
+pub type EmitCap<'f, I, S> = Ability<'f, I, S, ()>;
+
 impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
-    pub fn fold<A, F>(f: F) -> Fx<'f, (Self, (A, S)), A>
+    pub fn fold_stream<A, F>(f: F) -> Fx<'f, (Self, (A, S)), A>
     where
         A: Clone + 'f,
-        F: Fn(A, I) -> Fx<'f, S, Acc<A>> + Clone + 'f,
+        F: Fn(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
         Fx::ctx()
             .flat_map(move |(stream, initial): (Self, A)| {
@@ -40,10 +47,10 @@ impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
             .contra_map(|(s, (a, r))| ((s, a), r))
     }
 
-    pub fn fold_stream<A, F>(self, f: F) -> Fx<'f, (A, S), A>
+    pub fn fold<A, F>(self, f: F) -> Fx<'f, (A, S), A>
     where
         A: Clone + 'f,
-        F: Fn(A, I) -> Fx<'f, S, Acc<A>> + Clone + 'f,
+        F: Fn(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
         Fx::ctx()
             .flat_map(move |initial: A| Self::fold_stream_rec(initial, self.clone(), f.clone()))
@@ -52,7 +59,7 @@ impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
     fn fold_stream_rec<A, F>(current: A, stream: Self, f: F) -> Fx<'f, S, A>
     where
         A: Clone + 'f,
-        F: Fn(A, I) -> Fx<'f, S, Acc<A>> + Clone + 'f,
+        F: Fn(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
         stream.map_m(move |step| {
             match step {
@@ -61,8 +68,8 @@ impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
                     let acc = f(current.clone(), head);
                     let f = f.clone();
                     acc.map_m(move |acc| match acc {
-                        Acc::Done(a) => Fx::immediate(a), // TODO: stop stream producer
-                        Acc::Next(a) => Self::fold_stream_rec(a, (&*tail).clone(), f.clone()),
+                        Item::Done(a) => Fx::immediate(a), // TODO: stop stream producer
+                        Item::Next(a) => Self::fold_stream_rec(a, (&*tail).clone(), f.clone()),
                     })
                 }
             }
