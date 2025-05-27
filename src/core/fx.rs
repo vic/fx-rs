@@ -58,7 +58,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         }
     }
 
-    pub fn then<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
+    pub fn adapt<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
         U: Clone,
         C: Fn(T) -> S + Clone + 'f,
@@ -66,8 +66,10 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     {
         match self.0 {
             Eff::Immediate(v) => fmap(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().then(cmap.clone(), fmap.clone())),
-            Eff::Pending(f) => Fx::pending(move |t: T| f(cmap(t)).then(cmap.clone(), fmap.clone())),
+            Eff::Stopped(f) => Fx::stopped(move || f().adapt(cmap.clone(), fmap.clone())),
+            Eff::Pending(f) => {
+                Fx::pending(move |t: T| f(cmap(t)).adapt(cmap.clone(), fmap.clone()))
+            }
         }
     }
 }

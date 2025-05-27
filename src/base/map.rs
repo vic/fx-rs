@@ -6,7 +6,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     where
         F: Fn(T) -> S + Clone + 'f,
     {
-        self.then(cmap, Fx::immediate)
+        self.adapt(cmap, Fx::immediate)
     }
 
     pub fn map<F, U>(self, f: F) -> Fx<'f, S, U>
@@ -22,7 +22,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         U: Clone,
         F: Fn(V) -> Fx<'f, S, U> + Clone + 'f,
     {
-        self.then(identity, f)
+        self.adapt(identity, f)
     }
 
     pub fn flat_map<F, T, U>(self, f: F) -> Fx<'f, (S, T), U>
@@ -30,6 +30,6 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         U: Clone,
         F: Fn(V) -> Fx<'f, T, U> + Clone + 'f,
     {
-        self.then(|(s, _)| s, move |v| f(v).contra_map(|(_, t)| t))
+        self.adapt(|(s, _)| s, move |v| f(v).contra_map(|(_, t)| t))
     }
 }

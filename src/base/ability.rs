@@ -47,6 +47,19 @@ where
     pub fn clone_boxed(&self) -> Box<dyn Fn(I) -> Fx<'f, S, O> + 'f> {
         self.0.clone()
     }
+
+    pub fn adapt<C, H, F, T, U, V, M>(self, imap: H, cmap: C, fmap: F) -> Ability<'f, T, M, U>
+    where
+        T: Clone + 'f,
+        U: Clone,
+        V: Clone,
+        M: Clone,
+        H: Fn(T) -> I + Clone + 'f,
+        C: Fn(M) -> S + Clone + 'f,
+        F: Fn(O) -> Fx<'f, M, U> + Clone + 'f,
+    {
+        Ability::new(move |t: T| self.apply(imap(t)).adapt(cmap.clone(), fmap.clone()))
+    }
 }
 
 #[derive(Clone)]
