@@ -1,4 +1,5 @@
-use crate::{Fx, Handler};
+use super::handler::Handler;
+use crate::Fx;
 use dyn_clone::{DynClone, clone_trait_object};
 
 impl<'f, I, O: Clone> Fx<'f, I, O> {

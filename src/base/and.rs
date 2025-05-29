@@ -36,14 +36,6 @@ impl<'a, A: Clone, B: Clone, C: Clone, V: Clone> Fx<'a, (A, (B, C)), V> {
 }
 
 impl<'a, A, B, V: Clone> Fx<'a, (A, B), V> {
-    pub fn provide_left(self, a: A) -> Fx<'a, B, V>
-    where
-        A: Clone,
-        B: Clone,
-    {
-        self.provide_part(a, |a, b| (a, b))
-    }
-
     pub fn and_swap(self) -> Fx<'a, (B, A), V> {
         self.contra_map(|(b, a)| (a, b))
     }

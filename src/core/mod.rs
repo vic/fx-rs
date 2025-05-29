@@ -1,8 +1,3 @@
-mod eff;
 mod fx;
+mod map;
 mod provide;
-
-#[cfg(test)]
-mod test;
-
-pub use fx::{Fx, Nil};
