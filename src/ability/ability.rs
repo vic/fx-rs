@@ -2,16 +2,6 @@ use super::handler::Handler;
 use crate::Fx;
 use dyn_clone::{DynClone, clone_trait_object};
 
-impl<'f, I, O: Clone> Fx<'f, I, O> {
-    pub fn apply<F>(i: I) -> Fx<'f, F, O>
-    where
-        I: Clone + 'f,
-        F: Fn(I) -> O + Clone,
-    {
-        Fx::ctx().map(move |f: F| f(i.clone()))
-    }
-}
-
 impl<'f, I, S, O> Ability<'f, I, S, O>
 where
     O: Clone,
@@ -34,7 +24,7 @@ where
         Handler::new(move |e: Fx<'f, (Self, B), V>| e.provide_left(Self::new(f.clone())))
     }
 
-    fn new<F>(f: F) -> Self
+    pub(crate) fn new<F>(f: F) -> Self
     where
         F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
     {

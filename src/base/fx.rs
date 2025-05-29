@@ -12,6 +12,16 @@ impl<'f, V: Clone> Fx<'f, Nil, V> {
     }
 }
 
+impl<'f, I, O: Clone> Fx<'f, I, O> {
+    pub fn apply<F>(i: I) -> Fx<'f, F, O>
+    where
+        I: Clone + 'f,
+        F: Fn(I) -> O + Clone,
+    {
+        Fx::ctx().map(move |f: F| f(i.clone()))
+    }
+}
+
 impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn resume(self) -> Self {
         self.start(|e| e)
