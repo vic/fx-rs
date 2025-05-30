@@ -12,22 +12,25 @@ pub(super) type Start<'f, S, V> = Box<dyn StartFn<'f, S, V>>;
 
 clone_trait_object!(<'f, S: 'f, V: Clone + 'f> ContinueFn<'f, S, V>);
 pub(super) trait ContinueFn<'f, S: 'f, V: Clone + 'f>:
-    DynClone + Fn(S) -> Fx<'f, S, V> + 'f
+    DynClone + FnMut(S) -> Fx<'f, S, V> + 'f
 {
 }
 
 impl<'f, S: 'f, V: Clone + 'f, F> ContinueFn<'f, S, V> for F where
-    F: Fn(S) -> Fx<'f, S, V> + Clone + 'f
+    F: FnMut(S) -> Fx<'f, S, V> + Clone + 'f
 {
 }
 
 clone_trait_object!(<'f, S: 'f, V: Clone + 'f> StartFn<'f, S, V>);
 pub(super) trait StartFn<'f, S: 'f, V: Clone + 'f>:
-    DynClone + Fn() -> Fx<'f, S, V> + 'f
+    DynClone + FnMut() -> Fx<'f, S, V> + 'f
 {
 }
 
-impl<'f, S: 'f, V: Clone + 'f, F> StartFn<'f, S, V> for F where F: Fn() -> Fx<'f, S, V> + Clone + 'f {}
+impl<'f, S: 'f, V: Clone + 'f, F> StartFn<'f, S, V> for F where
+    F: FnMut() -> Fx<'f, S, V> + Clone + 'f
+{
+}
 
 impl<'f, S: 'f, V: Clone + 'f> Clone for Eff<'f, S, V> {
     fn clone(&self) -> Self {

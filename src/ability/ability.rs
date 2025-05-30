@@ -12,12 +12,12 @@ where
     where
         I: Clone,
     {
-        Fx::ctx().flat_map(move |f: Self| f.apply(i.clone()))
+        Fx::ctx().flat_map(move |mut f: Self| f.apply(i.clone()))
     }
 
     pub fn handler<F, B, V>(f: F) -> Handler<'f, (Self, B), B, V, V>
     where
-        F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
+        F: FnMut(I) -> Fx<'f, S, O> + Clone + 'f,
         B: Clone,
         V: Clone,
     {
@@ -26,28 +26,33 @@ where
 
     pub(crate) fn new<F>(f: F) -> Self
     where
-        F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
+        F: FnMut(I) -> Fx<'f, S, O> + Clone + 'f,
     {
         Self(Box::new(f))
     }
 
-    fn apply(&self, i: I) -> Fx<'f, S, O> {
+    fn apply(&mut self, i: I) -> Fx<'f, S, O> {
         self.0(i)
     }
 
-    pub fn clone_boxed(&self) -> Box<dyn Fn(I) -> Fx<'f, S, O> + 'f> {
+    pub fn clone_boxed(&self) -> Box<dyn FnMut(I) -> Fx<'f, S, O> + 'f> {
         self.0.clone()
     }
 
-    pub fn adapt<C, H, F, T, U, V, M>(self, imap: H, cmap: C, fmap: F) -> Ability<'f, T, M, U>
+    pub fn adapt<C, H, F, T, U, V, M>(
+        mut self,
+        mut imap: H,
+        cmap: C,
+        fmap: F,
+    ) -> Ability<'f, T, M, U>
     where
         T: Clone + 'f,
         U: Clone,
         V: Clone,
         M: Clone,
-        H: Fn(T) -> I + Clone + 'f,
-        C: Fn(M) -> S + Clone + 'f,
-        F: Fn(O) -> Fx<'f, M, U> + Clone + 'f,
+        H: FnMut(T) -> I + Clone + 'f,
+        C: FnMut(M) -> S + Clone + 'f,
+        F: FnMut(O) -> Fx<'f, M, U> + Clone + 'f,
     {
         Ability::new(move |t: T| self.apply(imap(t)).adapt(cmap.clone(), fmap.clone()))
     }
@@ -58,7 +63,7 @@ pub struct Ability<'f, I, S, O: Clone>(Box<dyn CapFn<'f, I, S, O> + 'f>);
 
 clone_trait_object!(<'f, I, S, O: Clone> CapFn<'f, I, S, O>);
 
-trait CapFn<'f, I, S, O>: DynClone + Fn(I) -> Fx<'f, S, O>
+trait CapFn<'f, I, S, O>: DynClone + FnMut(I) -> Fx<'f, S, O>
 where
     O: Clone + 'f,
     S: 'f,
@@ -67,7 +72,7 @@ where
 
 impl<'f, I, S, O, F> CapFn<'f, I, S, O> for F
 where
-    F: Fn(I) -> Fx<'f, S, O> + Clone,
+    F: FnMut(I) -> Fx<'f, S, O> + Clone,
     O: Clone + 'f,
     S: 'f,
 {
