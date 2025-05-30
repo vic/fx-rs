@@ -16,9 +16,9 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
     pub fn apply<F>(i: I) -> Fx<'f, F, O>
     where
         I: Clone + 'f,
-        F: FnMut(I) -> O + Clone,
+        F: Fn(I) -> O + Clone,
     {
-        Fx::ctx().map(move |mut f: F| f(i.clone()))
+        Fx::ctx().map(move |f: F| f(i.clone()))
     }
 }
 
@@ -27,9 +27,9 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         self.start(|e| e)
     }
 
-    pub fn restart<F>(self, mut f: F) -> Self
+    pub fn restart<F>(self, f: F) -> Self
     where
-        F: FnMut() -> Self + Clone + 'f,
+        F: Fn() -> Self + Clone + 'f,
     {
         self.start(move |_| f())
     }
@@ -38,9 +38,9 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         Fx::stopped(|| Fx::func(|_: S| -> V { panic!("tried to use halted effect.") }))
     }
 
-    pub fn via<F, T, U>(self, mut f: F) -> Fx<'f, T, U>
+    pub fn via<F, T, U>(self, f: F) -> Fx<'f, T, U>
     where
-        F: FnMut(Self) -> Fx<'f, T, U>,
+        F: Fn(Self) -> Fx<'f, T, U>,
         U: Clone,
     {
         f(self)
@@ -58,7 +58,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 impl<'f, S, V, F> From<F> for Fx<'f, S, V>
 where
     V: Clone,
-    F: FnMut(S) -> V + Clone + 'f,
+    F: Fn(S) -> V + Clone + 'f,
 {
     fn from(f: F) -> Self {
         Fx::func(f)
