@@ -38,6 +38,13 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
         Fx(Eff::Stopped(Box::new(f)))
     }
 
+    pub(crate) fn provide<T: Clone>(self, s: S) -> Fx<'f, T, V>
+    where
+        S: Clone,
+    {
+        Fx(Eff::Provided(s.clone(), Box::new(move |_| self))).adapt(move |_| s, Fx::immediate)
+    }
+
     pub fn start<F>(self, r: F) -> Self
     where
         F: FnOnce(Self) -> Self + Clone + 'f,
