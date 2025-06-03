@@ -13,6 +13,7 @@ impl<V: Clone> Fx<'_, Nil, V> {
                 Eff::Immediate(v) => return Some(v),
                 Eff::Stopped(_) => return None,
                 Eff::Pending(f) => e = f(Nil),
+                Eff::Provided(s, f) => e = f(s),
             }
         }
     }
@@ -40,17 +41,20 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn start<F>(self, r: F) -> Self
     where
         F: FnOnce(Self) -> Self + Clone + 'f,
+        S: Clone,
     {
         match self.0 {
             Eff::Stopped(f) => r(f()),
             Eff::Immediate(v) => Fx::immediate(v),
             Eff::Pending(f) => Fx::pending(move |s: S| f(s).start(r.clone())),
+            Eff::Provided(s, f) => Fx::pending(move |s: S| f(s).start(r.clone())).provide(s),
         }
     }
 
     pub fn adapt<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
         U: Clone,
+        S: Clone,
         C: FnOnce(T) -> S + Clone + 'f,
         F: FnOnce(V) -> Fx<'f, T, U> + Clone + 'f,
     {
@@ -58,11 +62,22 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
             Eff::Immediate(v) => fmap(v),
             Eff::Stopped(f) => Fx::stopped(move || f().adapt(cmap, fmap)),
             Eff::Pending(f) => Fx::pending(move |t: T| f(cmap.clone()(t)).adapt(cmap, fmap)),
+            Eff::Provided(s, f) => Self::propagate_provided(s, f, fmap),
         }
+    }
+
+    fn propagate_provided<T, U, C, F>(s: S, f: C, fmap: F) -> Fx<'f, T, U>
+    where
+        U: Clone,
+        S: Clone,
+        C: FnOnce(S) -> Fx<'f, S, V> + Clone + 'f,
+        F: FnOnce(V) -> Fx<'f, T, U> + Clone + 'f,
+    {
+        f(s.clone()).adapt(move |_: T| s, fmap)
     }
 }
 
-impl<'f, S: 'f, V: Clone> Clone for Fx<'f, S, V> {
+impl<'f, S: Clone + 'f, V: Clone> Clone for Fx<'f, S, V> {
     fn clone(&self) -> Self {
         Fx(self.0.clone())
     }

@@ -3,8 +3,9 @@ use dyn_clone::{DynClone, clone_trait_object};
 
 pub(super) enum Eff<'f, S, V: Clone> {
     Immediate(V),
-    Pending(Continue<'f, S, V>),
     Stopped(Start<'f, S, V>),
+    Pending(Continue<'f, S, V>),
+    Provided(S, Continue<'f, S, V>),
 }
 
 pub(super) type Continue<'f, S, V> = Box<dyn ContinueFn<'f, S, V>>;
@@ -32,12 +33,13 @@ impl<'f, S: 'f, V: Clone + 'f, F> StartFn<'f, S, V> for F where
 {
 }
 
-impl<'f, S: 'f, V: Clone + 'f> Clone for Eff<'f, S, V> {
+impl<'f, S: Clone + 'f, V: Clone + 'f> Clone for Eff<'f, S, V> {
     fn clone(&self) -> Self {
         match self {
             Eff::Immediate(v) => Eff::Immediate(v.clone()),
             Eff::Pending(f) => Eff::Pending(f.clone()),
             Eff::Stopped(f) => Eff::Stopped(f.clone()),
+            Eff::Provided(s, f) => Eff::Provided(s.clone(), f.clone()),
         }
     }
 }

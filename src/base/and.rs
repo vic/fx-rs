@@ -1,6 +1,6 @@
 use crate::{Fx, Nil};
 
-impl<'a, S, V: Clone> Fx<'a, S, V> {
+impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     pub fn and_nil(self) -> Fx<'a, (S, Nil), V> {
         self.contra_map(|(s, _)| s)
     }
@@ -35,7 +35,7 @@ impl<'a, A: Clone, B: Clone, C: Clone, V: Clone> Fx<'a, (A, (B, C)), V> {
     }
 }
 
-impl<'a, A, B, V: Clone> Fx<'a, (A, B), V> {
+impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, (A, B), V> {
     pub fn and_swap(self) -> Fx<'a, (B, A), V> {
         self.contra_map(|(b, a)| (a, b))
     }
@@ -49,7 +49,7 @@ impl<'a, A, B, V: Clone> Fx<'a, (A, B), V> {
     }
 }
 
-impl<'a, A, B, V: Clone> Fx<'a, A, Fx<'a, B, V>> {
+impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, A, Fx<'a, B, V>> {
     pub fn and_flat(self) -> Fx<'a, (A, B), V> {
         self.flat_map(|v| v)
     }

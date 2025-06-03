@@ -1,7 +1,7 @@
 use crate::Fx;
 use std::convert::identity;
 
-impl<'f, S, V: Clone> Fx<'f, S, V> {
+impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
     pub fn contra_map<T, F>(self, cmap: F) -> Fx<'f, T, V>
     where
         F: FnOnce(T) -> S + Clone + 'f,
@@ -27,6 +27,7 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 
     pub fn flat_map<F, T, U>(self, f: F) -> Fx<'f, (S, T), U>
     where
+        T: Clone,
         U: Clone,
         F: FnOnce(V) -> Fx<'f, T, U> + Clone + 'f,
     {

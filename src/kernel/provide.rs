@@ -5,7 +5,8 @@ impl<'a, S: Clone, A: Clone> Fx<'a, S, A> {
         match self.0 {
             Eff::Immediate(a) => Fx::immediate(a),
             Eff::Stopped(f) => Fx::stopped(move || f().provide(s.clone())),
-            Eff::Pending(f) => f(s.clone()).provide(s),
+            Eff::Pending(f) => Fx(Eff::Provided(s.clone(), Box::new(f))).provide(s),
+            Eff::Provided(m, f) => f(m.clone()).provide(m),
         }
     }
 }

@@ -22,7 +22,7 @@ impl<'f, I, O: Clone> Fx<'f, I, O> {
     }
 }
 
-impl<'f, S, V: Clone> Fx<'f, S, V> {
+impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
     pub fn resume(self) -> Self {
         self.start(|e| e)
     }
