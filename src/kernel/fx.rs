@@ -25,21 +25,21 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
 
     pub fn pending<F>(f: F) -> Self
     where
-        F: Fn(S) -> Self + Clone + 'f,
+        F: FnOnce(S) -> Self + Clone + 'f,
     {
         Fx(Eff::Pending(Box::new(f)))
     }
 
     pub fn stopped<F>(f: F) -> Self
     where
-        F: Fn() -> Self + Clone + 'f,
+        F: FnOnce() -> Self + Clone + 'f,
     {
         Fx(Eff::Stopped(Box::new(f)))
     }
 
     pub fn start<F>(self, r: F) -> Self
     where
-        F: Fn(Self) -> Self + Clone + 'f,
+        F: FnOnce(Self) -> Self + Clone + 'f,
     {
         match self.0 {
             Eff::Stopped(f) => r(f()),
@@ -51,15 +51,13 @@ impl<'f, S, V: Clone> Fx<'f, S, V> {
     pub fn adapt<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
         U: Clone,
-        C: Fn(T) -> S + Clone + 'f,
-        F: Fn(V) -> Fx<'f, T, U> + Clone + 'f,
+        C: FnOnce(T) -> S + Clone + 'f,
+        F: FnOnce(V) -> Fx<'f, T, U> + Clone + 'f,
     {
         match self.0 {
             Eff::Immediate(v) => fmap(v),
-            Eff::Stopped(f) => Fx::stopped(move || f().adapt(cmap.clone(), fmap.clone())),
-            Eff::Pending(f) => {
-                Fx::pending(move |t: T| f(cmap(t)).adapt(cmap.clone(), fmap.clone()))
-            }
+            Eff::Stopped(f) => Fx::stopped(move || f().adapt(cmap, fmap)),
+            Eff::Pending(f) => Fx::pending(move |t: T| f(cmap.clone()(t)).adapt(cmap, fmap)),
         }
     }
 }

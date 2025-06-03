@@ -17,7 +17,7 @@ where
 
     pub fn handler<F, B, V>(f: F) -> Handler<'f, (Self, B), B, V, V>
     where
-        F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
+        F: FnOnce(I) -> Fx<'f, S, O> + Clone + 'f,
         B: Clone,
         V: Clone,
     {
@@ -26,16 +26,16 @@ where
 
     pub(crate) fn new<F>(f: F) -> Self
     where
-        F: Fn(I) -> Fx<'f, S, O> + Clone + 'f,
+        F: FnOnce(I) -> Fx<'f, S, O> + Clone + 'f,
     {
         Self(Box::new(f))
     }
 
-    fn apply(&self, i: I) -> Fx<'f, S, O> {
+    fn apply(self, i: I) -> Fx<'f, S, O> {
         self.0(i)
     }
 
-    pub fn clone_boxed(&self) -> Box<dyn Fn(I) -> Fx<'f, S, O> + 'f> {
+    pub fn clone_boxed(&self) -> Box<dyn FnOnce(I) -> Fx<'f, S, O> + 'f> {
         self.0.clone()
     }
 
@@ -45,9 +45,9 @@ where
         U: Clone,
         V: Clone,
         M: Clone,
-        H: Fn(T) -> I + Clone + 'f,
-        C: Fn(M) -> S + Clone + 'f,
-        F: Fn(O) -> Fx<'f, M, U> + Clone + 'f,
+        H: FnOnce(T) -> I + Clone + 'f,
+        C: FnOnce(M) -> S + Clone + 'f,
+        F: FnOnce(O) -> Fx<'f, M, U> + Clone + 'f,
     {
         Ability::new(move |t: T| self.apply(imap(t)).adapt(cmap.clone(), fmap.clone()))
     }
@@ -58,7 +58,7 @@ pub struct Ability<'f, I, S, O: Clone>(Box<dyn CapFn<'f, I, S, O> + 'f>);
 
 clone_trait_object!(<'f, I, S, O: Clone> CapFn<'f, I, S, O>);
 
-trait CapFn<'f, I, S, O>: DynClone + Fn(I) -> Fx<'f, S, O>
+trait CapFn<'f, I, S, O>: DynClone + FnOnce(I) -> Fx<'f, S, O>
 where
     O: Clone + 'f,
     S: 'f,
@@ -67,7 +67,7 @@ where
 
 impl<'f, I, S, O, F> CapFn<'f, I, S, O> for F
 where
-    F: Fn(I) -> Fx<'f, S, O> + Clone,
+    F: FnOnce(I) -> Fx<'f, S, O> + Clone,
     O: Clone + 'f,
     S: 'f,
 {
