@@ -1,7 +1,8 @@
-mod eff;
+mod ability;
 mod fx;
 
 #[cfg(test)]
 mod test;
 
-pub use fx::{Fx, Nil};
+pub use ability::Ability;
+pub use fx::Fx;
