@@ -1,7 +1,15 @@
 use crate::{Fx, Handler};
 
-impl<'f, A, V: Clone> Fx<'f, A, V> {
-    pub fn handle<B, U: Clone>(self, handler: Handler<'f, A, B, V, U>) -> Fx<'f, B, U> {
+impl<'f, A, V> Fx<'f, A, V>
+where
+    A: Clone,
+    V: Clone,
+{
+    pub fn handle<B, U>(self, handler: Handler<'f, A, B, V, U>) -> Fx<'f, B, U>
+    where
+        B: Clone,
+        U: Clone,
+    {
         handler.handle(self)
     }
 }
