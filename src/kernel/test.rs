@@ -1,20 +1,23 @@
-use super::{Fx, Nil};
+use crate::Fx;
 
 #[test]
-fn eval_constant() {
-    let e = Fx::immediate(22);
+fn eval_immediate() {
+    let e = Fx::immediate((), 22);
     let v = e.eval();
-    assert_eq!(v, Some(22))
-}
-
-#[test]
-fn eval_stopped() {
-    let s = Fx::stopped(|| Fx::immediate(22));
-    assert_eq!(s.eval(), None)
+    assert_eq!(v, 22)
 }
 
 #[test]
 fn eval_pending() {
-    let s = Fx::pending(|_: Nil| Fx::immediate(22));
-    assert_eq!(s.eval(), Some(22))
+    let e = Fx::pending(|u: ()| Fx::immediate(u, 22));
+    let v = e.eval();
+    assert_eq!(v, 22)
+}
+
+#[test]
+fn adapt_contramap() {
+    let e = Fx::pending(|i: u8| Fx::immediate(i, i * 10));
+    let e = e.adapt(|_: ()| 2, |u, _, v| Fx::immediate(u, v));
+    let v = e.eval();
+    assert_eq!(v, 20)
 }
