@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::Fx;
+use crate::{Fx, Lens};
 
 pub struct State<'f, S: Clone>(PhantomData<&'f S>);
 impl<'f, S: Clone> State<'f, S> {
@@ -31,11 +31,6 @@ impl<'f, S: Clone> State<'f, S> {
         T: Clone,
         F: FnOnce(S) -> Fx<'f, T, S> + Clone + 'f,
     {
-        Self::get()
-            .flat_map(|s| f(s).flat_map(|s| Self::set(s)))
-            .contra_map(
-                |(s, t): (S, T)| (s.clone(), (t, s)),
-                |_, (_, (t, s))| (s, t),
-            )
+        Self::get().flat_map(f).via(Lens::left().zoom_in(Self::set))
     }
 }
