@@ -1,4 +1,6 @@
-use crate::Fx;
+use std::usize;
+
+use crate::{Ability, Fold, Fx};
 
 use super::{Item, Stream};
 
@@ -27,7 +29,7 @@ fn test_stream_once_fold() {
 
 #[test]
 fn test_stream_cons_fold_done_early() {
-    let stream = Stream::cons("12".to_owned(), Stream::single("33".to_owned()));
+    let stream = Stream::cons("12".to_owned(), Fx::value(Stream::single("33".to_owned())));
     let folded = stream
         .fold(|acc: usize, item: String| {
             let val = acc + item.parse::<usize>().unwrap_or(666);
@@ -40,7 +42,7 @@ fn test_stream_cons_fold_done_early() {
 
 #[test]
 fn test_stream_cons_fold() {
-    let stream = Stream::cons("12".to_owned(), Stream::single("33".to_owned()));
+    let stream = Stream::cons("12".to_owned(), Fx::value(Stream::single("33".to_owned())));
     let folded = stream
         .fold(|acc: usize, item: String| {
             let val = acc + item.parse::<usize>().unwrap_or(666);
@@ -49,4 +51,17 @@ fn test_stream_cons_fold() {
         .provide_left(10)
         .eval();
     assert_eq!(folded, 55)
+}
+
+#[test]
+fn fold_ability_into_stream() {
+    let e = Ability::request(1)
+        .then(Ability::request(2))
+        .then(Fx::value(()));
+    let ab = Ability::new(|u: usize| Fx::value(u * 10));
+    let e = e.via(ab.fold_with(Stream::<usize, ()>::Nil));
+    let e = e.flat_map(|(s, _)| s.fold(|acc: usize, item: usize| Fx::pure(Item::Next(acc + item))));
+    let e = e.contra_map(|n: usize| ((), (n, ())), |n, _| n);
+    let v = e.provide(100).eval();
+    assert_eq!(v, 130);
 }

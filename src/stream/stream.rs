@@ -1,4 +1,7 @@
-use crate::{Fx, State};
+use crate::{
+    Fold, Fx, State,
+    core::fold::{FoldAbility, FoldHandler},
+};
 
 #[derive(Clone)]
 pub enum Item<T> {
@@ -12,32 +15,45 @@ pub enum Stream<'f, I: Clone, S: Clone> {
     Cons(I, Box<StreamFx<'f, I, S>>),
 }
 
-pub type StreamFx<'f, I, S> = Fx<'f, S, Stream<'f, I, S>>;
-
-impl<'f, I: Clone, S: Clone> Stream<'f, I, S> {
-    pub fn empty() -> StreamFx<'f, I, S> {
-        Fx::value(Self::Nil)
-    }
-
-    pub fn cons(head: I, tail: StreamFx<'f, I, S>) -> StreamFx<'f, I, S> {
-        Fx::value(Self::Cons(head, Box::new(tail)))
-    }
-
-    pub fn single(i: I) -> StreamFx<'f, I, S> {
-        Fx::value(Self::Cons(i, Box::new(Self::empty())))
-    }
-
-    pub fn concat(left: StreamFx<'f, I, S>, right: StreamFx<'f, I, S>) -> StreamFx<'f, I, S> {
-        left.concat(right)
+impl<'f, I: Clone, S: Clone> Default for Stream<'f, I, S> {
+    fn default() -> Self {
+        Stream::Nil
     }
 }
 
-impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
-    pub fn concat(self, tail: Self) -> Self {
-        self.map_m(|s| match s {
-            Stream::Nil => tail,
-            Stream::Cons(head, fx) => Stream::cons(head, Self::concat(*fx, tail)),
-        })
+pub type StreamFx<'f, I, S> = Fx<'f, S, Stream<'f, I, S>>;
+
+impl<'f, I: Clone, S: Clone> Stream<'f, I, S> {
+    pub fn empty() -> Self {
+        Self::Nil
+    }
+
+    pub fn cons(head: I, tail: StreamFx<'f, I, S>) -> Self {
+        Self::Cons(head, Box::new(tail))
+    }
+
+    pub fn single(i: I) -> Self {
+        Self::cons(i, Fx::value(Self::empty()))
+    }
+
+    pub fn concat(self, right: Stream<'f, I, S>) -> Self {
+        match self {
+            Stream::Nil => right,
+            Stream::Cons(head, fx) => Stream::cons(head, fx.map(|s| s.concat(right))),
+        }
+    }
+
+    pub fn append(self, item: I) -> Self {
+        self.concat(Self::single(item))
+    }
+
+    pub fn fold<A, F>(self, f: F) -> Fx<'f, (A, S), A>
+    where
+        A: Clone + 'f,
+        F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
+    {
+        State::get()
+            .flat_map(move |initial: A| Self::fold_stream_rec(initial, Fx::value(self), f.clone()))
     }
 
     pub fn fold_stream<A, F>(f: F) -> Fx<'f, (Self, (A, S)), A>
@@ -47,21 +63,12 @@ impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
     {
         State::get()
             .flat_map(move |(stream, initial): (Self, A)| {
-                Self::fold_stream_rec(initial, stream, f.clone())
+                Self::fold_stream_rec(initial, Fx::value(stream), f.clone())
             })
             .contra_map(|(s, (a, r))| ((s, a), r), |_, ((s, a), r)| (s, (a, r)))
     }
 
-    pub fn fold<A, F>(self, f: F) -> Fx<'f, (A, S), A>
-    where
-        A: Clone + 'f,
-        F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
-    {
-        State::get()
-            .flat_map(move |initial: A| Self::fold_stream_rec(initial, self.clone(), f.clone()))
-    }
-
-    fn fold_stream_rec<A, F>(current: A, stream: Self, f: F) -> Fx<'f, S, A>
+    fn fold_stream_rec<A, F>(current: A, stream: StreamFx<'f, I, S>, f: F) -> Fx<'f, S, A>
     where
         A: Clone + 'f,
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
@@ -79,5 +86,20 @@ impl<'f, I: Clone, S: Clone> StreamFx<'f, I, S> {
                 }
             }
         })
+    }
+}
+
+impl<'f, I, S, Item> Fold<'f, I, S, Item, Stream<'f, Item, S>>
+    for FoldAbility<'f, I, S, Item, Stream<'f, Item, S>>
+where
+    I: Clone,
+    S: Clone,
+    Item: Clone,
+{
+    fn fold_with<V: Clone>(
+        self,
+        acc: Stream<'f, Item, S>,
+    ) -> FoldHandler<'f, I, S, Item, V, Stream<'f, Item, S>> {
+        self.fold(acc, |acc, item| Fx::value(Stream::append(acc, item)))
     }
 }
