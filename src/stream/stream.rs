@@ -52,8 +52,7 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
         A: Clone + 'f,
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
-        State::get()
-            .flat_map(|initial: A| Self::fold_stream_rec(initial, Fx::value(self), f))
+        State::get().flat_map(|initial: A| Self::fold_stream_rec(initial, Fx::value(self), f))
     }
 
     pub fn fold_stream<A, F>(f: F) -> Fx<'f, (Self, (A, S)), A>
