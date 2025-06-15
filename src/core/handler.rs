@@ -14,18 +14,18 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
 
 impl<'f, A: Clone, B: Clone, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
     pub fn on_left<S: Clone>(self) -> Handler<'f, (A, S), (B, S), U, V> {
-        Handler::new(move |e| e.and_swap().via(self.clone().on_right()).and_swap())
+        Handler::new(|e| e.and_swap().via(self.on_right()).and_swap())
     }
 
     pub fn on_right<S: Clone>(self) -> Handler<'f, (S, A), (S, B), U, V> {
-        Handler::new(move |e| e.and_nest().via(self.clone().on_value()).and_flat())
+        Handler::new(|e| e.and_nest().via(self.on_value()).and_flat())
     }
 
     pub fn on_value<S: Clone>(self) -> Handler<'f, S, S, Fx<'f, A, U>, Fx<'f, B, V>> {
-        Handler::new(move |e: Fx<'f, S, Fx<'f, A, U>>| {
-            e.flat_map(|i: Fx<'f, A, U>| Fx::func(move |h: Self| h.handle(i.clone())))
+        Handler::new(|e: Fx<'f, S, Fx<'f, A, U>>| {
+            e.flat_map(|i: Fx<'f, A, U>| Fx::func(|h: Self| h.handle(i)))
                 .and_swap()
-                .provide_left(self.clone())
+                .provide_left(self)
         })
     }
 }

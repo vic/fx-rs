@@ -30,7 +30,7 @@ impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, (A, B), V> {
     }
 
     pub fn and_nest(self) -> Fx<'a, A, Fx<'a, B, V>> {
-        Fx::func(move |a: A| self.clone().provide_left(a))
+        Fx::func(|a: A| self.provide_left(a))
     }
 }
 

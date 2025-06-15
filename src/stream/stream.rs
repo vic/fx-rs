@@ -53,7 +53,7 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
         State::get()
-            .flat_map(move |initial: A| Self::fold_stream_rec(initial, Fx::value(self), f.clone()))
+            .flat_map(|initial: A| Self::fold_stream_rec(initial, Fx::value(self), f))
     }
 
     pub fn fold_stream<A, F>(f: F) -> Fx<'f, (Self, (A, S)), A>
@@ -62,8 +62,8 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
         State::get()
-            .flat_map(move |(stream, initial): (Self, A)| {
-                Self::fold_stream_rec(initial, Fx::value(stream), f.clone())
+            .flat_map(|(stream, initial): (Self, A)| {
+                Self::fold_stream_rec(initial, Fx::value(stream), f)
             })
             .contra_map(|(s, (a, r))| ((s, a), r), |_, ((s, a), r)| (s, (a, r)))
     }
@@ -73,13 +73,13 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
         A: Clone + 'f,
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,
     {
-        stream.map_m(move |step| {
+        stream.map_m(|step| {
             match step {
                 Stream::Nil => Fx::value(current),
                 Stream::Cons(head, tail) => {
                     let f0 = f.clone();
                     let acc = f(current, head);
-                    acc.map_m(move |acc| match acc {
+                    acc.map_m(|acc| match acc {
                         Item::Done(a) => Fx::value(a), // TODO: stop stream producer
                         Item::Next(a) => Self::fold_stream_rec(a, *tail, f0),
                     })
