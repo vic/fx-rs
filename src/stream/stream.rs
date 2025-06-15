@@ -1,6 +1,6 @@
 use crate::{
     Fold, Fx, State,
-    core::fold::{FoldAbility, FoldHandler},
+    core::{FoldAbility, FoldHandler},
 };
 
 #[derive(Clone)]
