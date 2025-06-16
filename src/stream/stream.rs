@@ -1,7 +1,4 @@
-use crate::{
-    Fold, Fx, State,
-    core::{FoldAbility, FoldHandler},
-};
+use crate::{Acc, Fx, State};
 
 #[derive(Clone)]
 pub enum Item<T> {
@@ -88,17 +85,8 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
     }
 }
 
-impl<'f, S, I, Item> Fold<'f, I, S, Item, Stream<'f, S, Item>>
-    for FoldAbility<'f, I, S, Item, Stream<'f, S, Item>>
-where
-    I: Clone,
-    S: Clone,
-    Item: Clone,
-{
-    fn fold_with<V: Clone>(
-        self,
-        acc: Stream<'f, S, Item>,
-    ) -> FoldHandler<'f, I, S, Item, V, Stream<'f, S, Item>> {
-        self.fold(acc, |acc, item| Fx::value(Stream::append(acc, item)))
+impl<'f, S: Clone, I: Clone> Acc<'f, S, I> for Stream<'f, S, I> {
+    fn acc_fx(self, i: I) -> Fx<'f, S, Self> {
+        Fx::value(Stream::append(self, i))
     }
 }

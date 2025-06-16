@@ -1,6 +1,6 @@
 use std::convert::identity;
 
-use crate::{Ability, Fx, Lens, State, core::fold::Fold};
+use crate::{Ability, Fx, Lens, State};
 
 #[test]
 fn value() {
@@ -119,7 +119,8 @@ fn rw_ability() {
 #[test]
 fn fold_outcome() {
     let e = Ability::request(11).then(Ability::request(22));
-    let h = Ability::new(|n: usize| Fx::value(n * 2)).fold(0, |acc, i| Fx::value(acc + i));
+    let h =
+        Ability::new(|n: usize| Fx::value(n * 2)).acc_outcome_with(0, |acc, i| Fx::value(acc + i));
     let e = h.handle(e);
     let v = e.eval();
 
@@ -132,7 +133,7 @@ fn option_outcome() {
         .map(|s: String| s.chars().rev().collect::<String>())
         .map(|s: String| s.parse::<usize>().unwrap());
     let ab = Ability::new(|n: usize| Fx::value(n.to_string()));
-    let h = ab.fold_default();
+    let h = ab.acc_outcome_default();
     let e = h.handle(e);
     let v = e.eval();
 
@@ -145,7 +146,7 @@ fn some_outcome() {
         .map(|s: String| s.chars().rev().collect::<String>())
         .map(|s: String| s.parse::<usize>().unwrap());
     let h = Ability::new(|n: usize| Fx::value(n.to_string()))
-        .fold_default()
+        .acc_outcome_default()
         .map(|e| e.map(|(o, u): (Option<String>, usize)| (o.unwrap(), u)));
     let e = h.handle(e);
     let v = e.eval();
@@ -156,7 +157,7 @@ fn some_outcome() {
 #[test]
 fn vec_outcome() {
     let e = Ability::request(11).then(Ability::request(22));
-    let h = Ability::new(|n: usize| Fx::value(n * 2)).fold_default();
+    let h = Ability::new(|n: usize| Fx::value(n * 2)).acc_outcome_default();
     let e = h.handle(e);
     let v = e.eval();
 
@@ -170,7 +171,7 @@ fn acc_outcome() {
     let y: F = F::new(|n| Fx::value(n * 2));
     let e = Ability::request(x).then(Ability::request(y)).map(|_| true);
 
-    let h = Ability::new(Fx::value).fold(2u8, |acc, f: F| f.apply(acc));
+    let h = Ability::new(Fx::value).acc_outcome_with(2u8, |acc, f: F| f.apply(acc));
 
     let v = e.via(h).eval();
     assert_eq!(v, (24u8, true))

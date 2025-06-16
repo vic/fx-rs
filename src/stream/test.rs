@@ -1,6 +1,6 @@
 use std::usize;
 
-use crate::{Ability, Fold, Fx};
+use crate::{Ability, Fx};
 
 use super::{Item, Stream};
 
@@ -59,7 +59,7 @@ fn fold_ability_outcomes_into_stream() {
         .then(Ability::request(2))
         .then(Fx::value(()));
     let ab = Ability::new(|u: usize| Fx::value(u * 10));
-    let e = e.via(ab.fold_with(Stream::Nil));
+    let e = e.via(ab.acc_outcome(Stream::Nil));
     let e = e.flat_map(|(s, _)| s.fold(|acc: usize, item: usize| Fx::pure(Item::Next(acc + item))));
     let e = e.contra_map(|n: usize| ((), (n, ())), |n, _| n);
     let v = e.provide(100).eval();
