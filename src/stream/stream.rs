@@ -83,6 +83,34 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
             }
         })
     }
+
+    pub fn adapt<T, U, Getter, Setter, FMap>(
+        self,
+        getter: Getter,
+        setter: Setter,
+        fmap: FMap,
+    ) -> Stream<'f, T, U>
+    where
+        T: Clone + 'f,
+        U: Clone + 'f,
+        Getter: FnOnce(T) -> S + Clone + 'f,
+        Setter: FnOnce(T, S) -> T + Clone + 'f,
+        FMap: FnOnce(I) -> U + Clone + 'f,
+    {
+        match self {
+            Stream::Nil => Stream::Nil,
+            Stream::Cons(head, fx) => {
+                let getter0 = getter.clone();
+                let setter0 = setter.clone();
+                let head = fmap.clone()(head);
+                let fx = fx.adapt(
+                    |t: T| getter0(t),
+                    |t, s, stream| Fx::immediate(setter0(t, s), stream.adapt(getter, setter, fmap)),
+                );
+                Stream::cons(head, fx)
+            }
+        }
+    }
 }
 
 impl<'f, S: Clone, I: Clone> Acc<'f, S, I> for Stream<'f, S, I> {
