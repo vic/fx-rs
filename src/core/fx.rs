@@ -1,6 +1,6 @@
 use crate::Fx;
 
-use super::State;
+use super::{Pair, State};
 
 impl<'f, V: Clone> Fx<'f, (), V> {
     pub fn pure(value: V) -> Self {
@@ -36,19 +36,20 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         self.map_m(|v| Fx::value(f(v)))
     }
 
-    pub fn flat_map<R, U, F>(self, f: F) -> Fx<'f, (S, R), U>
+    pub fn flat_map<R, U, P, F>(self, f: F) -> Fx<'f, P, U>
     where
         U: Clone,
         V: Clone,
-        R: Clone,
+        R: Clone + 'f,
+        P: Pair<S, R>,
         F: FnOnce(V) -> Fx<'f, R, U> + Clone + 'f,
     {
         self.adapt(
-            |(s, _r)| s,
-            |_sr, s, v| {
+            |p: P| p.fst(),
+            |_, s, v| {
                 f(v).adapt(
-                    |(_s, r)| r,
-                    |_sr, r, u| Fx::value(u).contra_map(|_sr| (s, r), |_sr, sr| sr),
+                    |p: P| p.snd(),
+                    |_, r, u| Fx::value(u).contra_map(|_| P::from((s, r)), |_, p| p),
                 )
             },
         )
@@ -61,10 +62,11 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         self.map_m(|_| e)
     }
 
-    pub fn and_then<T, U>(self, e: Fx<'f, T, U>) -> Fx<'f, (S, T), U>
+    pub fn and_then<T, U, P>(self, e: Fx<'f, T, U>) -> Fx<'f, P, U>
     where
         T: Clone,
         U: Clone,
+        P: Pair<S, T>,
     {
         self.flat_map(|_| e)
     }

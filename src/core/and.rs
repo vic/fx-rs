@@ -1,41 +1,90 @@
-use crate::Fx;
+use crate::{Fx, Pair};
 
 impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
-    pub fn and_nil(self) -> Fx<'a, (S, ()), V> {
-        self.contra_map(|(s, _)| s, |_, s| (s, ()))
+    pub fn and_nil<P: Pair<S, ()>>(self) -> Fx<'a, P, V> {
+        self.contra_map(|p: P| p.fst(), |_, s| P::from((s, ())))
     }
 }
 
-impl<'a, S: Clone, V: Clone> Fx<'a, (S, S), V> {
-    pub fn and_collapse(self) -> Fx<'a, S, V> {
-        self.contra_map(|s: S| (s.clone(), s), |_, (_, s)| s)
+impl<'a, P: Clone, V: Clone> Fx<'a, P, V> {
+    pub fn and_collapse<S: Clone>(self) -> Fx<'a, S, V>
+    where
+        P: Pair<S, S>,
+    {
+        self.contra_map(|s: S| P::from((s.clone(), s)), |_, p| p.snd())
     }
 }
 
-impl<'a, S: Clone, B: Clone, V: Clone> Fx<'a, ((S, B), S), V> {
-    pub fn and_collapse_left(self) -> Fx<'a, (S, B), V> {
-        self.contra_map(|(s, b): (S, B)| ((s.clone(), b), s), |_, (sb, _)| sb)
+impl<'a, SBS: Clone, V: Clone> Fx<'a, SBS, V> {
+    pub fn and_collapse_left<S, B, SB>(self) -> Fx<'a, SB, V>
+    where
+        S: Clone,
+        B: Clone,
+        SB: Pair<S, B>,
+        SBS: Pair<SB, S>,
+    {
+        self.contra_map(
+            |sb: SB| {
+                let (s, b) = sb.into();
+                SBS::from((SB::from((s.clone(), b)), s))
+            },
+            |_, sbs| sbs.fst(),
+        )
     }
 }
 
-impl<'a, A: Clone, B: Clone, C: Clone, V: Clone> Fx<'a, (A, (B, C)), V> {
-    pub fn and_rotate(self) -> Fx<'a, (C, (A, B)), V> {
-        self.contra_map(|(c, (a, b))| (a, (b, c)), |_, (a, (b, c))| (c, (a, b)))
+impl<'a, ABC: Clone, V: Clone> Fx<'a, ABC, V> {
+    pub fn and_rotate<A, B, C, BC, AB, CAB>(self) -> Fx<'a, CAB, V>
+    where
+        A: Clone,
+        B: Clone,
+        C: Clone,
+        BC: Pair<B, C>,
+        ABC: Pair<A, BC>,
+        AB: Pair<A, B>,
+        CAB: Pair<C, AB>,
+    {
+        self.contra_map(
+            |cab: CAB| {
+                let (c, ab) = cab.into();
+                let (a, b) = ab.into();
+                ABC::from((a, BC::from((b, c))))
+            },
+            |_, abc: ABC| {
+                let (a, bc) = abc.into();
+                let (b, c) = bc.into();
+                CAB::from((c, AB::from((a, b))))
+            },
+        )
     }
 }
 
-impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, (A, B), V> {
-    pub fn and_swap(self) -> Fx<'a, (B, A), V> {
-        self.contra_map(|(b, a)| (a, b), |_, (a, b)| (b, a))
+impl<'a, P: Clone, V: Clone> Fx<'a, P, V> {
+    pub fn and_swap<A, B, Q>(self) -> Fx<'a, Q, V>
+    where
+        A: Clone,
+        B: Clone,
+        P: Pair<A, B>,
+        Q: Pair<B, A>,
+    {
+        self.contra_map(|q: Q| q.bwd(), |_, p| p.bwd())
     }
 
-    pub fn and_nest(self) -> Fx<'a, A, Fx<'a, B, V>> {
+    pub fn and_nest<A, B>(self) -> Fx<'a, A, Fx<'a, B, V>>
+    where
+        A: Clone,
+        B: Clone,
+        P: Pair<A, B>,
+    {
         Fx::func(|a: A| self.provide_left(a))
     }
 }
 
 impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, A, Fx<'a, B, V>> {
-    pub fn and_flat(self) -> Fx<'a, (A, B), V> {
+    pub fn and_flat<P>(self) -> Fx<'a, P, V>
+    where
+        P: Pair<A, B>,
+    {
         self.flat_map(|v| v)
     }
 }

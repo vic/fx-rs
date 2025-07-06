@@ -23,8 +23,8 @@ impl<'f, A: Clone, B: Clone, U: Clone, V: Clone> Handler<'f, A, B, U, V> {
 
     pub fn on_value<S: Clone>(self) -> Handler<'f, S, S, Fx<'f, A, U>, Fx<'f, B, V>> {
         Handler::new(|e: Fx<'f, S, Fx<'f, A, U>>| {
-            e.flat_map(|i: Fx<'f, A, U>| Fx::func(|h: Self| h.handle(i)))
-                .and_swap()
+            e.flat_map::<_, _, (_, _), _>(|i: Fx<'f, A, U>| Fx::func(|h: Self| h.handle(i)))
+                .and_swap::<_, _, (_, _)>()
                 .provide_left(self)
         })
     }

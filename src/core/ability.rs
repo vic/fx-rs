@@ -1,4 +1,4 @@
-use crate::{Ability, Fx, State};
+use crate::{Ability, Fx, Pair, State};
 
 use super::handler::Handler;
 
@@ -8,19 +8,21 @@ where
     S: Clone + 'f,
     I: Clone + 'f,
 {
-    pub fn request(i: I) -> Fx<'f, (Self, S), O>
+    pub fn request<P>(i: I) -> Fx<'f, P, O>
     where
         I: Clone,
+        P: Pair<Self, S>,
     {
         State::get().flat_map(|f: Self| f.apply(i))
     }
 
-    pub fn handler<B, V>(self) -> Handler<'f, (Self, B), B, V, V>
+    pub fn handler<B, V, P>(self) -> Handler<'f, P, B, V, V>
     where
         B: Clone,
         V: Clone,
+        P: Pair<Self, B>,
     {
-        Handler::new(|e: Fx<'f, (Self, B), V>| e.provide_left(self))
+        Handler::new(|e| e.provide_left(self))
     }
 
     pub fn imap<Y, F>(self, imap: F) -> Ability<'f, Y, S, O>
