@@ -1,7 +1,7 @@
 use fx::{Fx, State};
-use fx_lens::Lenses;
+use fx_lens::Lens;
 
-#[derive(Clone, Debug, PartialEq, Lenses)]
+#[derive(Clone, Debug, PartialEq, Lens)]
 struct ST {
     a: i32,
     b: String,
