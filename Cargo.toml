@@ -2,9 +2,9 @@
 resolver = "3"
 
 members = [
-    "fx",
-    "integration",
-    "lens_macros"
+    "crates/fx",
+    "crates/integration",
+    "crates/lens_macros"
 ]
 
 [workspace.package]
