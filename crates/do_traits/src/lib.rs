@@ -1,14 +1,16 @@
 // Same (map_m) and Bind (flat_map) traits for ergonomic effectful programming with fx_do!
 
 pub trait Same<V>: Sized {
+    /// This method should not be invoked directly. It is intended to be used within the `fx_do!` macro.
     fn same(self) -> V {
-        unreachable!()
+        compile_error!("The `same` method cannot be invoked directly. Use it within the `fx_do!` macro.");
     }
 }
 
 pub trait Bind<V>: Sized {
+    /// This method should not be invoked directly. It is intended to be used within the `fx_do!` macro.
     fn bind(self) -> V {
-        unreachable!()
+        compile_error!("The `bind` method cannot be invoked directly. Use it within the `fx_do!` macro.");
     }
 }
 
