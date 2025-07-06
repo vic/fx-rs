@@ -9,4 +9,5 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-fx-rs = { path = "../fx" }
+fx = { path = "../fx" }
+fx-lens = { path = "../lens_macros" }

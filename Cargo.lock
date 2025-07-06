@@ -9,26 +9,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
 
 [[package]]
-name = "fx-rs"
+name = "fx"
 version = "0.0.0-git"
 dependencies = [
  "dyn-clone",
 ]
 
 [[package]]
-name = "integration"
-version = "0.0.0-git"
-dependencies = [
- "fx-rs",
-]
-
-[[package]]
-name = "lens_macros"
+name = "fx-lens"
 version = "0.0.0-git"
 dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "integration"
+version = "0.0.0-git"
+dependencies = [
+ "fx",
+ "fx-lens",
 ]
 
 [[package]]

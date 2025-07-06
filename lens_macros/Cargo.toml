@@ -1,5 +1,5 @@
 [package]
-name = "lens_macros"
+name = "fx-lens"
 keywords.workspace = true
 license.workspace = true
 authors.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "fx-rs"
+name = "fx"
 description = "Algebraic Effects inspired by Kyo and Fx.go"
 readme = "README.md"
 keywords.workspace = true
