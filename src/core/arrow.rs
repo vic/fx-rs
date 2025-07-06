@@ -1,5 +1,5 @@
 use super::handler::Handler;
-use crate::{Fx, State};
+use crate::{Fx, Pair, State};
 use dyn_clone::{DynClone, clone_trait_object};
 
 impl<'f, I, O> Arrow<'f, I, O>
@@ -14,13 +14,14 @@ where
         State::get().map(|f: Self| f.apply(i))
     }
 
-    pub fn handler<F, B, V>(f: F) -> Handler<'f, (Self, B), B, V, V>
+    pub fn handler<B, V, P, F>(f: F) -> Handler<'f, P, B, V, V>
     where
         F: FnOnce(I) -> O + Clone + 'f,
         B: Clone,
         V: Clone,
+        P: Pair<Self, B>,
     {
-        Handler::new(|e: Fx<'f, (Self, B), V>| e.provide_left(Self::new(f)))
+        Handler::new(|e| e.provide_left(Self::new(f)))
     }
 
     pub fn new<F>(f: F) -> Self

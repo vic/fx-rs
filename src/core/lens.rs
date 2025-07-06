@@ -1,6 +1,6 @@
 use dyn_clone::{DynClone, clone_trait_object};
 
-use crate::{Fx, Handler};
+use crate::{Fx, Handler, Pair};
 
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
@@ -60,15 +60,23 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
     }
 }
 
-impl<'f, A: Clone, B: Clone> Lens<'f, (A, B), A> {
-    pub fn left() -> Self {
-        Self::new(|(a, _)| a, |(_, b), a| (a, b))
+impl<'f, A: Clone, P: Clone> Lens<'f, P, A> {
+    pub fn left<B>() -> Self
+    where
+        B: Clone,
+        P: Pair<A, B>,
+    {
+        Self::new(|p| p.fst(), |p, a| P::from((a, p.snd())))
     }
 }
 
-impl<'f, A: Clone, B: Clone> Lens<'f, (A, B), B> {
-    pub fn right() -> Self {
-        Self::new(|(_, b)| b, |(a, _), b| (a, b))
+impl<'f, B: Clone, P: Clone> Lens<'f, P, B> {
+    pub fn right<A>() -> Self
+    where
+        B: Clone,
+        P: Pair<A, B>,
+    {
+        Self::new(|p| p.snd(), |p, b| P::from((p.fst(), b)))
     }
 }
 

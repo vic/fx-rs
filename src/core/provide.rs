@@ -1,4 +1,4 @@
-use crate::Fx;
+use crate::{Fx, Pair};
 
 impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     pub fn provide<T: Clone>(self, s: S) -> Fx<'a, T, V> {
@@ -16,8 +16,13 @@ impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     }
 }
 
-impl<'a, A: Clone, B: Clone, V: Clone> Fx<'a, (A, B), V> {
-    pub fn provide_left(self, a: A) -> Fx<'a, B, V> {
-        self.provide_part(a, |a, b| (a, b), |_b, (_a, b)| b)
+impl<'a, P: Clone, V: Clone> Fx<'a, P, V> {
+    pub fn provide_left<A, B>(self, a: A) -> Fx<'a, B, V>
+    where
+        A: Clone + 'a,
+        B: Clone,
+        P: Pair<A, B>,
+    {
+        self.provide_part(a, |a, b| P::from((a, b)), |_b, p| p.snd())
     }
 }

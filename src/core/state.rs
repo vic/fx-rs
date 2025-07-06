@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{Fx, Lens};
+use crate::{Fx, Lens, Pair};
 
 pub struct State<'f, S: Clone>(PhantomData<&'f S>);
 impl<'f, S: Clone> State<'f, S> {
@@ -26,10 +26,11 @@ impl<'f, S: Clone> State<'f, S> {
         Self::get().map_m(f).map_m(State::set)
     }
 
-    pub fn update<T, F>(f: F) -> Fx<'f, (S, T), S>
+    pub fn update<T, P, F>(f: F) -> Fx<'f, P, S>
     where
-        T: Clone,
+        T: Clone + 'f,
         F: FnOnce(S) -> Fx<'f, T, S> + Clone + 'f,
+        P: Pair<S, T>,
     {
         Self::get().flat_map(f).via(Lens::left().zoom_in(Self::set))
     }

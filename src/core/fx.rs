@@ -1,6 +1,6 @@
 use crate::Fx;
 
-use super::{Product, State};
+use super::{Pair, State};
 
 impl<'f, V: Clone> Fx<'f, (), V> {
     pub fn pure(value: V) -> Self {
@@ -41,21 +41,15 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         U: Clone,
         V: Clone,
         R: Clone + 'f,
-        P: Product<S, R> + Clone,
+        P: Pair<S, R>,
         F: FnOnce(V) -> Fx<'f, R, U> + Clone + 'f,
     {
         self.adapt(
-            |p: P| {
-                let (s, _) = p.into();
-                s
-            },
+            |p: P| p.fst(),
             |_, s, v| {
                 f(v).adapt(
-                    |p: P| {
-                        let (_, r) = p.into();
-                        r
-                    },
-                    |_, r, u| Fx::value(u).contra_map(|_| P::from((s, r)), |_, sr| sr),
+                    |p: P| p.snd(),
+                    |_, r, u| Fx::value(u).contra_map(|_| P::from((s, r)), |_, p| p),
                 )
             },
         )
@@ -72,7 +66,7 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
     where
         T: Clone,
         U: Clone,
-        P: Product<S, T> + Clone,
+        P: Pair<S, T>,
     {
         self.flat_map(|_| e)
     }
