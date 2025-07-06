@@ -3,14 +3,18 @@
 pub trait Same<V>: Sized {
     /// This method should not be invoked directly. It is intended to be used within the `fx_do!` macro.
     fn same(self) -> V {
-        compile_error!("The `same` method cannot be invoked directly. Use it within the `fx_do!` macro.");
+        unreachable!(
+            "The `same` method cannot be invoked directly. Use it within the `fx_do!` macro."
+        );
     }
 }
 
 pub trait Bind<V>: Sized {
     /// This method should not be invoked directly. It is intended to be used within the `fx_do!` macro.
     fn bind(self) -> V {
-        compile_error!("The `bind` method cannot be invoked directly. Use it within the `fx_do!` macro.");
+        unreachable!(
+            "The `bind` method cannot be invoked directly. Use it within the `fx_do!` macro."
+        );
     }
 }
 
