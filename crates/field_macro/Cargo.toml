@@ -1,5 +1,6 @@
 [package]
-name = "integration"
+name = "fx-field"
+description = "Type directed field access macro for structs"
 keywords.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -8,8 +9,11 @@ homepage.workspace = true
 version.workspace = true
 edition.workspace = true
 
+[lib]
+proc-macro = true
+
 [dependencies]
+quote = "1"
+syn = "2"
+proc-macro2 = "1"
 fx = { path = "../fx" }
-fx-lens = { path = "../lens_macro" }
-fx-do = { path = "../do_macro" }
-fx-field = { path = "../field_macro" }

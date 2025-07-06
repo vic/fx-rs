@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "do_traits"
+version = "0.0.0-git"
+dependencies = [
+ "fx",
+]
+
+[[package]]
 name = "dyn-clone"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13,6 +20,27 @@ name = "fx"
 version = "0.0.0-git"
 dependencies = [
  "dyn-clone",
+]
+
+[[package]]
+name = "fx-do"
+version = "0.0.0-git"
+dependencies = [
+ "do_traits",
+ "fx",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "fx-field"
+version = "0.0.0-git"
+dependencies = [
+ "fx",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -29,6 +57,8 @@ name = "integration"
 version = "0.0.0-git"
 dependencies = [
  "fx",
+ "fx-do",
+ "fx-field",
  "fx-lens",
 ]
 

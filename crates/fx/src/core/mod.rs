@@ -2,6 +2,7 @@ mod ability;
 mod acc;
 mod and;
 mod arrow;
+mod field;
 mod fx;
 mod handler;
 mod lens;
@@ -9,12 +10,13 @@ mod pair;
 mod provide;
 mod state;
 
-pub use acc::Acc;
-pub use arrow::Arrow;
-pub use handler::Handler;
-pub use lens::Lens;
-pub use pair::Pair;
-pub use state::State;
+pub use self::acc::Acc;
+pub use self::arrow::Arrow;
+pub use self::field::Field;
+pub use self::handler::Handler;
+pub use self::lens::Lens;
+pub use self::pair::Pair;
+pub use self::state::State;
 
 // pub(crate) use fold::{AccAbility, AccHandler};
 

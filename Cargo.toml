@@ -4,7 +4,9 @@ resolver = "3"
 members = [
     "crates/fx",
     "crates/integration",
-    "crates/lens_macros"
+    "crates/lens_macro",
+    "crates/do_macro",
+    "crates/field_macro"
 ]
 
 [workspace.package]
