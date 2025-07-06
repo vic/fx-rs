@@ -1,0 +1,14 @@
+[package]
+name = "fx-rs"
+description = "Algebraic Effects inspired by Kyo and Fx.go"
+readme = "README.md"
+keywords.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dyn-clone = "1"

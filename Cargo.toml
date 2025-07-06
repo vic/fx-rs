@@ -1,14 +1,15 @@
-[package]
-name = "fx-rs"
-description = "Algebraic Effects inspired by Kyo and Fx.go"
-keywords = ["functional", "algebraic", "effects", "kyo"]
+[workspace]
+members = [
+    "fx",
+    "integration",
+    "lens_macros"
+]
+
+[workspace.package]
+keywords = ["functional", "algebraic", "effects"]
 license = "Apache-2.0"
 authors = ["Victor Borja <vborja@apache.org>"]
 repository = "https://github.com/vic/fx-rs"
 homepage = "https://vic.github.io/fx-rs"
-readme = "README.md"
 version = "0.0.0-git"
 edition = "2024"
-
-[dependencies]
-dyn-clone = "1.0.19"
