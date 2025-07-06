@@ -71,6 +71,19 @@ fn map() {
 }
 
 #[test]
+fn flat_map_basic() {
+    let fx = Fx::value(2).flat_map(|x| Fx::value(x * 10));
+    assert_eq!(fx.provide(((), ())).eval(), 20);
+}
+
+#[test]
+fn flat_map_ctx() {
+    let fx: Fx<(u8, u16), u16> =
+        Fx::func(|u: u8| u + 1).flat_map(|u: u8| Fx::func(move |v: u16| (u as u16) + v));
+    assert_eq!(fx.provide((1, 2)).eval(), 4);
+}
+
+#[test]
 fn put() {
     let e = State::set(22).map(|n: usize| n * 10);
     let e = e.provide(99);
