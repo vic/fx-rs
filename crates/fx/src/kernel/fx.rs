@@ -1,15 +1,13 @@
 use super::Ability;
 
-#[derive(Clone)]
-pub struct Fx<'f, S: Clone, V: Clone>(Eff<'f, S, V>);
+pub struct Fx<'f, S, V>(Eff<'f, S, V>);
 
-#[derive(Clone)]
-enum Eff<'f, S: Clone, V: Clone> {
+enum Eff<'f, S, V> {
     Immediate(S, V),
-    Pending(Ability<'f, S, S, V>),
+    Pending(Box<dyn Ability<'f, S, S, V> + 'f>),
 }
 
-impl<V: Clone> Fx<'_, (), V> {
+impl<V> Fx<'_, (), V> {
     pub fn eval(self) -> V {
         let mut e = self;
         loop {
@@ -21,23 +19,22 @@ impl<V: Clone> Fx<'_, (), V> {
     }
 }
 
-impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
+impl<'f, S, V> Fx<'f, S, V> {
     pub fn immediate(s: S, value: V) -> Self {
         Fx(Eff::Immediate(s, value))
     }
 
     pub fn pending<F>(f: F) -> Self
     where
-        F: FnOnce(S) -> Self + Clone + 'f,
+        F: FnOnce(S) -> Self + 'f,
     {
-        Fx(Eff::Pending(Ability::new(f)))
+        Fx(Eff::Pending(Box::new(f)))
     }
 
     pub fn adapt<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
     where
-        T: Clone,
-        S: Clone,
-        U: Clone,
+        S: 'f,
+        V: 'f,
         C: FnOnce(T) -> S + Clone + 'f,
         F: FnOnce(T, S, V) -> Fx<'f, T, U> + Clone + 'f,
     {

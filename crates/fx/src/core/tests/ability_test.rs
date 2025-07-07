@@ -1,12 +1,12 @@
 // Unit tests for core/ability.rs and handler.rs functionality
 #[cfg(test)]
 mod ability_tests {
-    use crate::{Ability, Fx, State};
+    use crate::{Ability, Fx, State, Handler};
 
     #[test]
     fn modify_and_continue_delimited_continuation() {
-        let e = Ability::request::<(_, _)>(5).map(|n| n * 2);
-        let h = Ability::new(|i| Fx::value(i + 10)).handler();
+        let e: Fx<'_, (Ability<'_, i32, (), i32>, ()), i32> = Ability::request::<(_, _)>(5).map(|n| n * 2);
+        let h: Handler<'_, (Ability<'_, i32, (), i32>, ()), (), i32, i32> = Ability::new(|i| Fx::value(i + 10)).handler();
 
         let e = h.handle(e);
         let v = e.eval();
