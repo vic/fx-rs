@@ -9,6 +9,7 @@ mod lens;
 mod pair;
 mod provide;
 mod state;
+pub mod put;
 
 pub use self::acc::Acc;
 pub use self::arrow::Arrow;
@@ -17,6 +18,7 @@ pub use self::handler::Handler;
 pub use self::lens::Lens;
 pub use self::pair::Pair;
 pub use self::state::State;
+pub use self::put::Put;
 
 // pub(crate) use fold::{AccAbility, AccHandler};
 
