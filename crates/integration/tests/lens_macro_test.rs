@@ -77,4 +77,4 @@ fn integration_focus_in_and_out() {
     );
 }
 
-// Macro-generated lens accessors now use Lens::from(())
+// Macro-generated lens accessors now use Lens::new()

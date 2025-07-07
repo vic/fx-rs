@@ -49,10 +49,10 @@ impl crate::Put<String> for ST {
 }
 impl ST {
     fn a<'f>() -> crate::Lens<'f, ST, i32> {
-        crate::Lens::from(())
+        crate::Lens::new()
     }
     fn b<'f>() -> crate::Lens<'f, ST, String> {
-        crate::Lens::from(())
+        crate::Lens::new()
     }
 }
 
@@ -132,7 +132,7 @@ mod lens_tests {
 #[test]
 fn lens_from_has_put_get_set() {
     let ctx = Ctx { a: 1, b: "hi" };
-    let lens = Lens::<'_, Ctx, u32>::from(());
+    let lens: Lens<'_, Ctx, u32> = Lens::new();
     // Test get
     let got = lens.get(ctx.clone());
     assert_eq!(got, 1);

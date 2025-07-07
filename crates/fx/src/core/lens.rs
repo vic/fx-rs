@@ -2,24 +2,21 @@ use dyn_clone::{DynClone, clone_trait_object};
 
 use crate::{Fx, Handler, Has, Pair, Put};
 
-impl<'f, Outer, Inner> From<()> for Lens<'f, Outer, Inner>
-where
-    Inner: Clone,
+#[derive(Clone)]
+pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
+
+impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
+
+    pub fn new() -> Self 
+    where Inner: Clone,
     Outer: Has<Inner> + Put<Inner> + Clone,
-{
-    fn from(_: ()) -> Self {
-        // Use the canonical construction directly
+    {
         Self(
             Box::new(|outer: Outer| outer.get().clone()),
             Box::new(|outer: Outer, inner: Inner| outer.put(inner)),
         )
     }
-}
 
-#[derive(Clone)]
-pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
-
-impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
     pub fn zoom_out<V: Clone>(self) -> Handler<'f, Inner, Outer, V, V> {
         Handler::new(|e| e.contra_map(self.0, self.1))
     }
@@ -152,7 +149,7 @@ mod from_impl_test {
     }
     #[test]
     fn from_has_put_lens() {
-        let lens: Lens<'_, Ctx, u32> = Lens::from(());
+        let lens: Lens<'_, Ctx, u32> = Lens::new();
         let ctx = Ctx { a: 1, b: "hi" };
         assert_eq!(lens.get(ctx.clone()), 1);
         let updated = lens.set(ctx.clone(), 42);

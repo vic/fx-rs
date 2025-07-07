@@ -24,7 +24,7 @@ pub fn derive_lens(input: TokenStream) -> TokenStream {
         let lens_name = format_ident!("lens_{}", fname);
         quote! {
             #vis fn #lens_name<'f>() -> ::fx::Lens<'f, #name #ty_generics, #fty> {
-                ::fx::Lens::from(())
+                ::fx::Lens::new()
             }
         }
     });
