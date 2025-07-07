@@ -24,7 +24,9 @@ fn law_set_idempotent<T>(init: T, set_val: T)
 where
     T: Debug + Clone + PartialEq,
 {
-    let fx = State::set(set_val.clone()).then(State::set(set_val.clone())).then(State::get());
+    let fx = State::set(set_val.clone())
+        .then(State::set(set_val.clone()))
+        .then(State::get());
     let result = fx.provide(init).eval();
     assert_eq!(result, set_val);
 }
