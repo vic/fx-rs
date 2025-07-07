@@ -1,33 +1,10 @@
 use fx::{Fx, State};
-use fx_lens::Lens;
+use fx_lens::{Lens, HasPut};
 
-#[derive(Clone, Debug, PartialEq, Lens)]
+#[derive(Clone, Debug, PartialEq, Lens, HasPut)]
 struct ST {
     a: i32,
     b: String,
-}
-
-impl fx::Has<i32> for ST {
-    fn get(&self) -> &i32 {
-        &self.a
-    }
-}
-impl fx::Put<i32> for ST {
-    fn put(mut self, value: i32) -> Self {
-        self.a = value;
-        self
-    }
-}
-impl fx::Has<String> for ST {
-    fn get(&self) -> &String {
-        &self.b
-    }
-}
-impl fx::Put<String> for ST {
-    fn put(mut self, value: String) -> Self {
-        self.b = value;
-        self
-    }
 }
 
 #[test]
