@@ -1,5 +1,5 @@
-use super::{Has, Lens, Put};
 use crate::{Fx, State};
+use crate::{Has, Lens, Put};
 
 #[derive(Clone, Debug, PartialEq)]
 struct Ctx {

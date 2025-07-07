@@ -20,4 +20,12 @@ pub use self::pair::Pair;
 pub use self::put::Put;
 pub use self::state::State;
 
-// pub(crate) use fold::{AccAbility, AccHandler};
+#[cfg(test)]
+mod tests {
+    mod ability_test;
+    mod acc_test;
+    mod fx_test;
+    mod lens_test;
+    mod put_test;
+    mod state_test;
+}
