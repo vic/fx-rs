@@ -1,6 +1,6 @@
 use dyn_clone::{DynClone, clone_trait_object};
 
-use crate::{Fx, Handler, Pair};
+use crate::{Fx, Handler, Pair, Has, Put};
 
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
@@ -58,6 +58,24 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
             |outer, right_inner| self.1(outer.clone(), right.1(self.0(outer), right_inner)),
         )
     }
+
+    pub fn from_has_put() -> Self
+    where
+        Outer: Has<Inner> + Put<Inner> + Clone,
+        Inner: Clone,
+    {
+        Self(
+            Box::new(|outer: Outer| outer.get().clone()),
+            Box::new(|outer: Outer, inner: Inner| outer.put(inner)),
+        )
+    }
+
+    pub fn get(&self, outer: Outer) -> Inner {
+        (self.0.clone())(outer)
+    }
+    pub fn set(&self, outer: Outer, inner: Inner) -> Outer {
+        (self.1.clone())(outer, inner)
+    }
 }
 
 impl<'f, A: Clone, P: Clone> Lens<'f, P, A> {
@@ -107,3 +125,7 @@ impl<'f, Outer: Clone, Inner: Clone, F> SetterFn<'f, Outer, Inner> for F where
     F: FnOnce(Outer, Inner) -> Outer + Clone + 'f
 {
 }
+
+#[cfg(test)]
+#[path = "lens_test.rs"]
+mod lens_test;

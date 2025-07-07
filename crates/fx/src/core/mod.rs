@@ -24,3 +24,5 @@ pub use self::put::Put;
 
 #[cfg(test)]
 mod test;
+
+mod lens_test;
