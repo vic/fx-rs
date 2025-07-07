@@ -9,6 +9,7 @@ mod lens;
 mod pair;
 mod provide;
 pub mod put;
+mod quant;
 mod state;
 
 pub use self::acc::Acc;
@@ -27,5 +28,6 @@ mod tests {
     mod fx_test;
     mod lens_test;
     mod put_test;
+    mod quant_test;
     mod state_test;
 }
