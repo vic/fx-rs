@@ -30,5 +30,6 @@ mod tests {
     mod fx_test;
     mod lens_test;
     mod put_test;
+    mod quantified_laws;
     mod state_test;
 }
