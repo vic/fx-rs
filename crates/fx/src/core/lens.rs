@@ -6,10 +6,10 @@ use crate::{Fx, Handler, Has, Pair, Put};
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
 
 impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
-
-    pub fn new() -> Self 
-    where Inner: Clone,
-    Outer: Has<Inner> + Put<Inner> + Clone,
+    pub fn new() -> Self
+    where
+        Inner: Clone,
+        Outer: Has<Inner> + Put<Inner> + Clone,
     {
         Self(
             Box::new(|outer: Outer| outer.get().clone()),

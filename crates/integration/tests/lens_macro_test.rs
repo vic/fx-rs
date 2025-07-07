@@ -1,5 +1,5 @@
 use fx::{Fx, State};
-use fx_lens::{Lens, HasPut};
+use fx_lens::{HasPut, Lens};
 
 #[derive(Clone, Debug, PartialEq, Lens, HasPut)]
 struct ST {
