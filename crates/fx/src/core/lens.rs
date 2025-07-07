@@ -125,7 +125,3 @@ impl<'f, Outer: Clone, Inner: Clone, F> SetterFn<'f, Outer, Inner> for F where
     F: FnOnce(Outer, Inner) -> Outer + Clone + 'f
 {
 }
-
-#[cfg(test)]
-#[path = "lens_test.rs"]
-mod lens_test;

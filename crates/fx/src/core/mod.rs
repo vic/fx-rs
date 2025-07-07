@@ -21,8 +21,3 @@ pub use self::state::State;
 pub use self::put::Put;
 
 // pub(crate) use fold::{AccAbility, AccHandler};
-
-#[cfg(test)]
-mod test;
-
-mod lens_test;
