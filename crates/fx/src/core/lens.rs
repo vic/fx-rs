@@ -125,3 +125,33 @@ impl<'f, Outer: Clone, Inner: Clone, F> SetterFn<'f, Outer, Inner> for F where
     F: FnOnce(Outer, Inner) -> Outer + Clone + 'f
 {
 }
+
+
+#[cfg(test)]
+mod from_impl_test {
+    use super::*;
+    #[derive(Clone, Debug, PartialEq)]
+    struct Ctx {
+        a: u32,
+        b: &'static str,
+    }
+    impl Has<u32> for Ctx {
+        fn get(&self) -> &u32 {
+            &self.a
+        }
+    }
+    impl Put<u32> for Ctx {
+        fn put(mut self, value: u32) -> Self {
+            self.a = value;
+            self
+        }
+    }
+    #[test]
+    fn from_has_put_lens() {
+        let lens: Lens<'_, Ctx, u32> = Lens::from_has_put();
+        let ctx = Ctx { a: 1, b: "hi" };
+        assert_eq!(lens.get(ctx.clone()), 1);
+        let updated = lens.set(ctx.clone(), 42);
+        assert_eq!(updated, Ctx { a: 42, b: "hi" });
+    }
+}
