@@ -16,7 +16,6 @@ proc-macro = true
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full"] }
-do_traits = { path = "../do_traits" }
 
 [dev-dependencies]
 fx = { path = "../fx" }
