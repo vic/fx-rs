@@ -1,16 +1,16 @@
 use std::marker::PhantomData;
 
-use super::field::Field;
+use super::field::Has;
 use crate::{Fx, Lens, Pair};
 
 pub struct State<'f, S: Clone>(PhantomData<&'f S>);
 impl<'f, S: Clone> State<'f, S> {
     pub fn get<T>() -> Fx<'f, S, T>
     where
-        S: Field<T> + Clone + 'f,
+        S: Has<T> + Clone + 'f,
         T: Clone + 'f,
     {
-        Fx::pending(|s: S| Fx::immediate(s.clone(), s.field().clone()))
+        Fx::pending(|s: S| Fx::immediate(s.clone(), s.get().clone()))
     }
 
     pub fn set(s: S) -> Fx<'f, S, S> {

@@ -12,7 +12,7 @@ mod state;
 
 pub use self::acc::Acc;
 pub use self::arrow::Arrow;
-pub use self::field::Field;
+pub use self::field::Has;
 pub use self::handler::Handler;
 pub use self::lens::Lens;
 pub use self::pair::Pair;

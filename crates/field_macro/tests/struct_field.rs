@@ -1,4 +1,4 @@
-use fx::Field;
+use fx::Has;
 
 #[test]
 fn test_field_struct() {
@@ -7,8 +7,7 @@ fn test_field_struct() {
         a: u32,
         b: &'static str,
     }
-
     let ctx = Ctx { a: 42, b: "hello" };
-    assert_eq!(*<Ctx as Field<u32>>::field(&ctx), 42u32);
-    assert_eq!(*<Ctx as Field<&'static str>>::field(&ctx), "hello");
+    assert_eq!(*<Ctx as Has<u32>>::get(&ctx), 42u32);
+    assert_eq!(*<Ctx as Has<&'static str>>::get(&ctx), "hello");
 }

@@ -1,9 +1,9 @@
-pub trait Field<T> {
-    fn field(&self) -> &T;
+pub trait Has<T> {
+    fn get(&self) -> &T;
 }
 
-impl<T: Clone> Field<T> for T {
-    fn field(&self) -> &T {
+impl<T: Clone> Has<T> for T {
+    fn get(&self) -> &T {
         self
     }
 }

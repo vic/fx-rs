@@ -1,4 +1,4 @@
-use fx::{Field, Fx, State};
+use fx::{Has, Fx, State};
 use fx_do::fx_do;
 
 #[test]
@@ -66,13 +66,13 @@ struct Ctx {
     b: B,
 }
 
-impl Field<A> for Ctx {
-    fn field(&self) -> &A {
+impl Has<A> for Ctx {
+    fn get(&self) -> &A {
         &self.a
     }
 }
-impl Field<B> for Ctx {
-    fn field(&self) -> &B {
+impl Has<B> for Ctx {
+    fn get(&self) -> &B {
         &self.b
     }
 }
@@ -88,13 +88,13 @@ fn test_struct_field() {
     assert_eq!(result, 20);
 }
 
-impl Field<A> for (A, B) {
-    fn field(&self) -> &A {
+impl Has<A> for (A, B) {
+    fn get(&self) -> &A {
         &self.0
     }
 }
-impl Field<B> for (A, B) {
-    fn field(&self) -> &B {
+impl Has<B> for (A, B) {
+    fn get(&self) -> &B {
         &self.1
     }
 }
