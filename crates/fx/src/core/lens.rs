@@ -2,18 +2,24 @@ use dyn_clone::{DynClone, clone_trait_object};
 
 use crate::{Fx, Handler, Has, Pair, Put};
 
+impl<'f, Outer, Inner> From<()> for Lens<'f, Outer, Inner>
+where
+    Inner: Clone,
+    Outer: Has<Inner> + Put<Inner> + Clone,
+{
+    fn from(_: ()) -> Self {
+        // Use the canonical construction directly
+        Self(
+            Box::new(|outer: Outer| outer.get().clone()),
+            Box::new(|outer: Outer, inner: Inner| outer.put(inner)),
+        )
+    }
+}
+
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
 
 impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
-    pub fn new<G, S>(getter: G, setter: S) -> Self
-    where
-        G: FnOnce(Outer) -> Inner + Clone + 'f,
-        S: FnOnce(Outer, Inner) -> Outer + Clone + 'f,
-    {
-        Self(Box::new(getter), Box::new(setter))
-    }
-
     pub fn zoom_out<V: Clone>(self) -> Handler<'f, Inner, Outer, V, V> {
         Handler::new(|e| e.contra_map(self.0, self.1))
     }
@@ -37,9 +43,11 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         Outer: 'f,
     {
         let reader = (left.0).clone();
-        Lens::<LeftOuter, Inner>::new(
-            |left_outer| self.0(reader(left_outer)),
-            |left_outer, inner| left.1(left_outer.clone(), self.1(left.0(left_outer), inner)),
+        Lens(
+            Box::new(|left_outer| self.0(reader(left_outer))),
+            Box::new(|left_outer, inner| {
+                left.1(left_outer.clone(), self.1(left.0(left_outer), inner))
+            }),
         )
     }
 
@@ -53,20 +61,11 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         Outer: 'f,
     {
         let reader = (self.0).clone();
-        Lens::<Outer, RightInner>::new(
-            |outer| right.0(reader(outer)),
-            |outer, right_inner| self.1(outer.clone(), right.1(self.0(outer), right_inner)),
-        )
-    }
-
-    pub fn from_has_put() -> Self
-    where
-        Outer: Has<Inner> + Put<Inner> + Clone,
-        Inner: Clone,
-    {
-        Self(
-            Box::new(|outer: Outer| outer.get().clone()),
-            Box::new(|outer: Outer, inner: Inner| outer.put(inner)),
+        Lens(
+            Box::new(|outer| right.0(reader(outer))),
+            Box::new(|outer, right_inner| {
+                self.1(outer.clone(), right.1(self.0(outer), right_inner))
+            }),
         )
     }
 
@@ -84,7 +83,10 @@ impl<'f, A: Clone, P: Clone> Lens<'f, P, A> {
         B: Clone,
         P: Pair<A, B>,
     {
-        Self::new(|p| p.fst(), |p, a| P::from((a, p.snd())))
+        Lens(
+            Box::new(|p| p.fst()),
+            Box::new(|p, a| P::from((a, p.snd()))),
+        )
     }
 }
 
@@ -94,7 +96,10 @@ impl<'f, B: Clone, P: Clone> Lens<'f, P, B> {
         B: Clone,
         P: Pair<A, B>,
     {
-        Self::new(|p| p.snd(), |p, b| P::from((p.fst(), b)))
+        Lens(
+            Box::new(|p| p.snd()),
+            Box::new(|p, b| P::from((p.fst(), b))),
+        )
     }
 }
 
@@ -126,7 +131,6 @@ impl<'f, Outer: Clone, Inner: Clone, F> SetterFn<'f, Outer, Inner> for F where
 {
 }
 
-
 #[cfg(test)]
 mod from_impl_test {
     use super::*;
@@ -148,7 +152,7 @@ mod from_impl_test {
     }
     #[test]
     fn from_has_put_lens() {
-        let lens: Lens<'_, Ctx, u32> = Lens::from_has_put();
+        let lens: Lens<'_, Ctx, u32> = Lens::from(());
         let ctx = Ctx { a: 1, b: "hi" };
         assert_eq!(lens.get(ctx.clone()), 1);
         let updated = lens.set(ctx.clone(), 42);

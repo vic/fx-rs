@@ -19,30 +19,53 @@ impl Put<u32> for Ctx {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ST {
+    a: i32,
+    b: String,
+}
+
+impl crate::Has<i32> for ST {
+    fn get(&self) -> &i32 {
+        &self.a
+    }
+}
+impl crate::Put<i32> for ST {
+    fn put(mut self, value: i32) -> Self {
+        self.a = value;
+        self
+    }
+}
+impl crate::Has<String> for ST {
+    fn get(&self) -> &String {
+        &self.b
+    }
+}
+impl crate::Put<String> for ST {
+    fn put(mut self, value: String) -> Self {
+        self.b = value;
+        self
+    }
+}
+impl ST {
+    fn a<'f>() -> crate::Lens<'f, ST, i32> {
+        crate::Lens::from(())
+    }
+    fn b<'f>() -> crate::Lens<'f, ST, String> {
+        crate::Lens::from(())
+    }
+}
+
 #[cfg(test)]
 mod lens_tests {
     use super::*;
-
-    #[derive(Clone, Debug, PartialEq)]
-    struct ST {
-        a: i32,
-        b: String,
-    }
-    impl ST {
-        fn b<'f>() -> Lens<'f, ST, String> {
-            Lens::new(|s: ST| s.b, |s, b| ST { b, ..s })
-        }
-        fn a<'f>() -> Lens<'f, ST, i32> {
-            Lens::new(|s: ST| s.a, |s, a| ST { a, ..s })
-        }
-    }
 
     #[test]
     fn test_focus_out() {
         let e: Fx<String, ()> = State::set("hello".to_string()).then(Fx::value(()));
         let e: Fx<ST, ()> = e.via(ST::b().zoom_out());
-        let e = e.then(State::get());
-        let result = e
+        let e: Fx<ST, ST> = e.then(State::get());
+        let result: ST = e
             .provide(ST {
                 a: 0,
                 b: "world".to_string(),
@@ -56,7 +79,6 @@ mod lens_tests {
             }
         );
     }
-
     #[test]
     fn test_focus_in() {
         let e: Fx<ST, ()> = Fx::immediate(
@@ -67,8 +89,8 @@ mod lens_tests {
             (),
         );
         let e: Fx<ST, ()> = e.via(ST::b().zoom_in(|()| State::set("bye".to_string()).map(|_| ())));
-        let e = e.then(State::get());
-        let result = e
+        let e: Fx<ST, ST> = e.then(State::get());
+        let result: ST = e
             .provide(ST {
                 a: 0,
                 b: "bad".to_string(),
@@ -82,7 +104,6 @@ mod lens_tests {
             }
         );
     }
-
     #[test]
     fn test_focus_in_and_out() {
         let inner: Fx<i32, ()> = Fx::immediate(10, ());
@@ -91,8 +112,8 @@ mod lens_tests {
             .then(State::map(|s: ST| ST { a: s.a * 2, ..s }))
             .then(Fx::value(()));
         let back: Fx<ST, i32> = outer.via(ST::a().zoom_in(|_| State::<i32>::map(|n| n + 10)));
-        let e = back.then(State::get());
-        let result = e
+        let e: Fx<ST, ST> = back.then(State::get());
+        let result: ST = e
             .provide(ST {
                 a: 0,
                 b: "hello".to_owned(),
@@ -111,7 +132,7 @@ mod lens_tests {
 #[test]
 fn lens_from_has_put_get_set() {
     let ctx = Ctx { a: 1, b: "hi" };
-    let lens = Lens::<'_, Ctx, u32>::from_has_put();
+    let lens = Lens::<'_, Ctx, u32>::from(());
     // Test get
     let got = lens.get(ctx.clone());
     assert_eq!(got, 1);
