@@ -1,6 +1,6 @@
 use dyn_clone::{DynClone, clone_trait_object};
 
-use crate::{Fx, Handler, Pair, Has, Put};
+use crate::{Fx, Handler, Has, Pair, Put};
 
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);

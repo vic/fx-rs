@@ -8,8 +8,8 @@ mod acc_tests {
     #[test]
     fn fold_outcome() {
         let e = Ability::request(11).then(Ability::request(22));
-        let h =
-            Ability::new(|n: usize| Fx::value(n * 2)).acc_outcome_with(0, |acc, i| Fx::value(acc + i));
+        let h = Ability::new(|n: usize| Fx::value(n * 2))
+            .acc_outcome_with(0, |acc, i| Fx::value(acc + i));
         let e = h.handle(e);
         let v = e.eval();
 

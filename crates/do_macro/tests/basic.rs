@@ -1,4 +1,4 @@
-use fx::{Has, Fx, State};
+use fx::{Fx, Has, State};
 use fx_do::fx_do;
 
 #[test]

@@ -1,4 +1,4 @@
-use super::{Lens, Has, Put};
+use super::{Has, Lens, Put};
 use crate::{Fx, State};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -48,7 +48,13 @@ mod lens_tests {
                 b: "world".to_string(),
             })
             .eval();
-        assert_eq!(result, ST { a: 0, b: "hello".to_string() });
+        assert_eq!(
+            result,
+            ST {
+                a: 0,
+                b: "hello".to_string()
+            }
+        );
     }
 
     #[test]
@@ -60,7 +66,7 @@ mod lens_tests {
             },
             (),
         );
-        let e: Fx<ST, ()> = e.via(ST::b().zoom_in(|()| State::set("bye".to_string()).map(|_| ()), ));
+        let e: Fx<ST, ()> = e.via(ST::b().zoom_in(|()| State::set("bye".to_string()).map(|_| ())));
         let e = e.then(State::get());
         let result = e
             .provide(ST {
@@ -68,7 +74,13 @@ mod lens_tests {
                 b: "bad".to_string(),
             })
             .eval();
-        assert_eq!(result, ST { a: 42, b: "bye".to_string() });
+        assert_eq!(
+            result,
+            ST {
+                a: 42,
+                b: "bye".to_string()
+            }
+        );
     }
 
     #[test]
@@ -86,7 +98,13 @@ mod lens_tests {
                 b: "hello".to_owned(),
             })
             .eval();
-        assert_eq!(result, ST { a: 30, b: "hello".to_owned() });
+        assert_eq!(
+            result,
+            ST {
+                a: 30,
+                b: "hello".to_owned()
+            }
+        );
     }
 }
 
