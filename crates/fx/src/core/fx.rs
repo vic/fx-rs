@@ -1,6 +1,7 @@
-use crate::Fx;
+use crate::kernel::fx::Fx;
 
-use super::{Pair, State};
+use super::pair::Pair;
+use super::state::State;
 
 impl<'f, V: Clone> Fx<'f, (), V> {
     pub fn pure(value: V) -> Self {

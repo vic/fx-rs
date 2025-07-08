@@ -1,4 +1,4 @@
-use crate::{Fx, Pair};
+use crate::{core::pair::Pair, kernel::fx::Fx};
 
 impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     pub fn and_nil<P: Pair<S, ()>>(self) -> Fx<'a, P, V> {

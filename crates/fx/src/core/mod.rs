@@ -1,35 +1,15 @@
-mod ability;
-mod acc;
-mod and;
-mod arrow;
-mod field;
-mod forall;
-mod fx;
-mod handler;
-mod lens;
-mod pair;
-mod provide;
-pub mod put;
-mod state;
-
-pub use self::acc::Acc;
-pub use self::arrow::Arrow;
-pub use self::field::Has;
-pub use self::handler::Handler;
-pub use self::lens::Lens;
-pub use self::pair::Pair;
-pub use self::put::Put;
-pub use self::state::State;
-// pub use self::forall::Forall;
+pub(super) mod ability;
+pub(super) mod acc;
+pub(super) mod and;
+pub(super) mod arrow;
+pub(super) mod forall;
+pub(super) mod fx;
+pub(super) mod handler;
+pub(super) mod has_put;
+pub(super) mod lens;
+pub(super) mod pair;
+pub(super) mod provide;
+pub(super) mod state;
 
 #[cfg(test)]
-mod tests {
-    mod ability_test;
-    mod acc_test;
-    mod forall_test;
-    mod fx_test;
-    mod lens_test;
-    mod put_test;
-    mod quantified_laws;
-    mod state_test;
-}
+mod tests;

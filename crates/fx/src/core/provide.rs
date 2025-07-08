@@ -1,4 +1,4 @@
-use crate::{Fx, Pair};
+use crate::{core::pair::Pair, kernel::fx::Fx};
 
 impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     pub fn provide<T: Clone>(self, s: S) -> Fx<'a, T, V> {

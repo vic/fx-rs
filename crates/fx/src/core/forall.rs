@@ -1,4 +1,4 @@
-use crate::Fx;
+use crate::kernel::fx::Fx;
 
 impl<'f, S: Clone, T: Clone> Fx<'f, S, T> {
     pub fn forall<F>(self, f: F) -> Self

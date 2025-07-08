@@ -1,5 +1,4 @@
-mod stream;
-pub use stream::{Item, Stream, StreamFx};
+pub(super) mod stream;
 
 #[cfg(test)]
 mod test;

@@ -1,4 +1,4 @@
-use crate::Put;
+use crate::core::has_put::Put;
 
 #[test]
 fn put_identity_for_leaf() {

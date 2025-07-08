@@ -1,15 +1,22 @@
 use dyn_clone::{DynClone, clone_trait_object};
 
-use crate::{Fx, Handler, Has, Pair, Put};
+use crate::{
+    core::{handler::Handler, has_put::HasPut, pair::Pair},
+    kernel::fx::Fx,
+};
 
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
 
-impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
+impl<'f, Outer, Inner> Lens<'f, Outer, Inner>
+where
+    Inner: Clone + 'f,
+    Outer: Clone + 'f,
+{
     pub fn new() -> Self
     where
         Inner: Clone,
-        Outer: Has<Inner> + Put<Inner> + Clone,
+        Outer: HasPut<Inner> + Clone,
     {
         Self(
             Box::new(|outer: Outer| outer.get().clone()),
@@ -17,17 +24,21 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         )
     }
 
-    pub fn zoom_out<V: Clone>(self) -> Handler<'f, Inner, Outer, V, V> {
-        Handler::new(|e| e.contra_map(self.0, self.1))
+    pub fn zoom_out<V>(self) -> impl Handler<'f, Inner, Outer, V, V>
+    where
+        V: Clone + 'f,
+    {
+        |e: Fx<'f, Inner, V>| e.contra_map(self.0, self.1)
     }
 
-    pub fn zoom_in<V: Clone, U: Clone, F>(self, inner: F) -> Handler<'f, Outer, Outer, V, U>
+    pub fn zoom_in<V, U, F>(self, inner: F) -> impl Handler<'f, Outer, Outer, V, U>
     where
         Inner: 'f,
+        V: Clone + 'f,
         U: Clone + 'f,
         F: FnOnce(V) -> Fx<'f, Inner, U> + Clone + 'f,
     {
-        Handler::new(|e| e.map_m(|v| inner(v).via(self.zoom_out())))
+        |e: Fx<'f, Outer, V>| e.map_m(|v| inner(v).via(self.zoom_out()))
     }
 
     pub fn prepend<LeftOuter: Clone>(
@@ -126,33 +137,4 @@ where
 impl<'f, Outer: Clone, Inner: Clone, F> SetterFn<'f, Outer, Inner> for F where
     F: FnOnce(Outer, Inner) -> Outer + Clone + 'f
 {
-}
-
-#[cfg(test)]
-mod from_impl_test {
-    use super::*;
-    #[derive(Clone, Debug, PartialEq)]
-    struct Ctx {
-        a: u32,
-        b: &'static str,
-    }
-    impl Has<u32> for Ctx {
-        fn get(&self) -> &u32 {
-            &self.a
-        }
-    }
-    impl Put<u32> for Ctx {
-        fn put(mut self, value: u32) -> Self {
-            self.a = value;
-            self
-        }
-    }
-    #[test]
-    fn from_has_put_lens() {
-        let lens: Lens<'_, Ctx, u32> = Lens::new();
-        let ctx = Ctx { a: 1, b: "hi" };
-        assert_eq!(lens.get(ctx.clone()), 1);
-        let updated = lens.set(ctx.clone(), 42);
-        assert_eq!(updated, Ctx { a: 42, b: "hi" });
-    }
 }

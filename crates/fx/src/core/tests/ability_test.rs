@@ -1,35 +1,89 @@
-// Unit tests for core/ability.rs and handler.rs functionality
-#[cfg(test)]
-mod ability_tests {
-    use crate::{Ability, Fx, State};
+use std::usize;
 
-    #[test]
-    fn modify_and_continue_delimited_continuation() {
-        let e = Ability::request::<(_, _)>(5).map(|n| n * 2);
-        let h = Ability::new(|i| Fx::value(i + 10)).handler();
+use crate::{
+    core::ability::{Abilities, AbilityExt},
+    core::handler::Handler,
+    core::state::State,
+    kernel::{ability::Ability, fx::Fx},
+};
 
-        let e = h.handle(e);
-        let v = e.eval();
+fn modify_and_continue_delimited_continuation<'f, A>(ability: A)
+where
+    A: Ability<'f, usize, (), usize> + Clone + 'f,
+{
+    // work over tuple environment.
+    let e = Abilities::request::<(_, _), _>(5).map(|n| n * 2);
 
-        // Expected: (5 (ability input) + 10 (handler)) * 2 (continuation) = 30
-        assert_eq!(v, 30)
+    let h = ability.handler();
+    let e = h.handle(e);
+    let v = e.eval();
+
+    // Expected: (5 (ability input) + 10 (handler)) * 2 (continuation) = 30
+    assert_eq!(v, 30)
+}
+
+#[test]
+fn fn_modify_and_continue() {
+    let ab = Abilities::new(|n: usize| Fx::pure(n + 10));
+    modify_and_continue_delimited_continuation(ab);
+}
+
+#[test]
+fn boxed_modify_and_continue() {
+    let ab: Box<dyn Ability<'_, usize, (), usize>> = Abilities::boxed(|n: usize| Fx::pure(n + 10));
+    modify_and_continue_delimited_continuation(ab);
+}
+
+#[test]
+fn struct_modify_and_continue() {
+    #[derive(Clone)]
+    struct A;
+    impl<'f> Ability<'f, usize, (), usize> for A {
+        fn apply(&self, i: usize) -> Fx<'f, (), usize> {
+            Fx::pure(i + 10)
+        }
     }
+    modify_and_continue_delimited_continuation(A);
+}
 
-    #[test]
-    fn ctx_map_ability() {
-        let e = Ability::request::<(_, _)>(1u8).then(Ability::request(2u8));
-        let ab = Ability::new(|i: u8| State::map(move |n: u8| n + i));
-        let v = e.via(ab.handler()).provide(10).eval();
-        assert_eq!(v, 13)
-    }
+#[test]
+fn ctx_map_ability() {
+    let e = Abilities::request::<(_, _), _>(1u8).then(Abilities::request(2u8));
+    let ab = Abilities::new(|i: u8| State::map(move |n: u8| n + i));
+    let v = e.via(ab.handler()).provide(10).eval();
+    assert_eq!(v, 13)
+}
 
-    #[test]
-    fn rw_ability() {
-        let read = State::<u8>::get();
-        let write = State::<u8>::map(|n| n * 10);
-        let e = Ability::request::<(_, _)>(read).then(Ability::request(write));
-        let ab = Ability::new(|fx| fx);
-        let v = e.via(ab.handler()).provide(22).eval();
-        assert_eq!(v, 220)
-    }
+#[test]
+fn rw_ability() {
+    let read = State::<u8>::get();
+    let write = State::<u8>::map(|n| n * 10);
+    let e = Abilities::request::<(_, _), _>(read).then(Abilities::request(write));
+    let ab = Abilities::new(|fx| fx);
+    let v = e.via(ab.handler()).provide(22).eval();
+    assert_eq!(v, 220)
+}
+
+#[test]
+fn ability_imap_maps_input() {
+    // imap should map the input type for an ability
+    let ab = Abilities::new(|n: usize| Fx::pure(n + 1));
+    // Map input: String -> usize
+    let ab2 = ab.imap(|i: String| i.len());
+    let fx = Abilities::request::<(_, _), _>("hello".to_owned());
+    let fx = fx.via(ab2.handler());
+    let result = fx.eval();
+    assert_eq!(result, 6);
+}
+
+#[test]
+fn ability_hmap_maps_handler() {
+    // hmap should allow mapping the handler for an ability
+    let ab = Abilities::new(|n: u32| Fx::pure(n + 1));
+    // hmap: wrap the handler to double the output
+    let ab2 = ab.hmap(|fx| fx.map(|n| n * 2));
+    let fx = Abilities::request::<(_, _), _>(10u32);
+    let fx = fx.via(ab2.handler());
+    let result = fx.eval();
+    assert_eq!(result, 22);
 }

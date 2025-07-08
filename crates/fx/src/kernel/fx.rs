@@ -1,4 +1,4 @@
-use super::Ability;
+use super::ability::Ability;
 
 #[derive(Clone)]
 pub struct Fx<'f, S: Clone, V: Clone>(Eff<'f, S, V>);
@@ -6,7 +6,7 @@ pub struct Fx<'f, S: Clone, V: Clone>(Eff<'f, S, V>);
 #[derive(Clone)]
 enum Eff<'f, S: Clone, V: Clone> {
     Immediate(S, V),
-    Pending(Ability<'f, S, S, V>),
+    Pending(Box<dyn Ability<'f, S, S, V> + 'f>),
 }
 
 impl<V: Clone> Fx<'_, (), V> {
@@ -26,11 +26,11 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         Fx(Eff::Immediate(s, value))
     }
 
-    pub fn pending<F>(f: F) -> Self
+    pub fn pending<A>(a: A) -> Self
     where
-        F: FnOnce(S) -> Self + Clone + 'f,
+        A: Ability<'f, S, S, V> + 'f,
     {
-        Fx(Eff::Pending(Ability::new(f)))
+        Fx(Eff::Pending(Box::new(a)))
     }
 
     pub fn adapt<T, U, C, F>(self, cmap: C, fmap: F) -> Fx<'f, T, U>
@@ -41,9 +41,11 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         C: FnOnce(T) -> S + Clone + 'f,
         F: FnOnce(T, S, V) -> Fx<'f, T, U> + Clone + 'f,
     {
-        Fx::pending(|t: T| match self.0 {
-            Eff::Immediate(s, v) => fmap(t, s, v),
-            Eff::Pending(f) => f.apply(cmap.clone()(t)).adapt(cmap, fmap),
+        let cmap = cmap.clone();
+        let fmap = fmap.clone();
+        Fx::pending(move |t: T| match self.0 {
+            Eff::Immediate(s, v) => fmap.clone()(t, s, v),
+            Eff::Pending(f) => f.apply(cmap.clone()(t)).adapt(cmap.clone(), fmap.clone()),
         })
     }
 }

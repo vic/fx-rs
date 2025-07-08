@@ -1,8 +1,5 @@
-mod ability;
-mod fx;
+pub(super) mod ability;
+pub(super) mod fx;
 
 #[cfg(test)]
 mod test;
-
-pub use ability::Ability;
-pub use fx::Fx;
