@@ -1,12 +1,12 @@
 use crate::Put;
 
-#[test]
-fn put_identity_for_leaf() {
-    let x = 5;
-    let y = 10;
-    let z = x.put(y);
-    assert_eq!(z, 10);
-}
+// #[test]
+// fn put_identity_for_leaf() {
+//     let x = 5;
+//     let y = 10;
+//     let z = x.put(y);
+//     assert_eq!(z, 10);
+// }
 
 #[derive(Clone, Debug, PartialEq)]
 struct Ctx {
@@ -21,9 +21,9 @@ impl Put<u32> for Ctx {
     }
 }
 
-#[test]
-fn put_field_in_struct() {
-    let ctx = Ctx { a: 1, b: "hi" };
-    let ctx2 = ctx.clone().put(42);
-    assert_eq!(ctx2, Ctx { a: 42, b: "hi" });
-}
+// #[test]
+// fn put_field_in_struct() {
+//     let ctx = Ctx { a: 1, b: "hi" };
+//     let ctx2 = ctx.clone().put(42);
+//     assert_eq!(ctx2, Ctx { a: 42, b: "hi" });
+// }

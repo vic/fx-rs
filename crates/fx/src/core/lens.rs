@@ -5,7 +5,7 @@ use crate::{Fx, Handler, Has, Pair, Put};
 #[derive(Clone)]
 pub struct Lens<'f, Outer: Clone, Inner: Clone>(Get<'f, Outer, Inner>, Set<'f, Outer, Inner>);
 
-impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
+impl<'f, Outer: Clone + 'f, Inner: Clone + 'f> Lens<'f, Outer, Inner> {
     pub fn new() -> Self
     where
         Inner: Clone,
@@ -17,17 +17,26 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         )
     }
 
-    pub fn zoom_out<V: Clone>(self) -> Handler<'f, Inner, Outer, V, V> {
-        Handler::new(|e| e.contra_map(self.0, self.1))
+    pub fn zoom_out<V: Clone + 'f>(&self) -> impl Handler<'f, Inner, Outer, V, V> {
+        let get = self.0.clone();
+        let set = self.1.clone();
+        Box::new(|e: Fx<'f, Inner, V>| e.contra_map(get, set))
     }
 
-    pub fn zoom_in<V: Clone, U: Clone, F>(self, inner: F) -> Handler<'f, Outer, Outer, V, U>
+    pub fn zoom_in<V: Clone + 'f, U: Clone + 'f, F>(
+        &self,
+        inner: F,
+    ) -> impl Handler<'f, Outer, Outer, V, U>
     where
         Inner: 'f,
-        U: Clone + 'f,
         F: FnOnce(V) -> Fx<'f, Inner, U> + Clone + 'f,
     {
-        Handler::new(|e| e.map_m(|v| inner(v).via(self.zoom_out())))
+        let get = self.0.clone();
+        let set = self.1.clone();
+        let inner = inner.clone();
+        Box::new(move |e: Fx<'f, Outer, V>| {
+            e.map_m(move |v| inner.clone()(v).via(Lens(get.clone(), set.clone()).zoom_out()))
+        })
     }
 
     pub fn prepend<LeftOuter: Clone>(
@@ -39,11 +48,14 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         LeftOuter: 'f,
         Outer: 'f,
     {
-        let reader = (left.0).clone();
+        let reader = left.0.clone();
         Lens(
-            Box::new(|left_outer| self.0(reader(left_outer))),
-            Box::new(|left_outer, inner| {
-                left.1(left_outer.clone(), self.1(left.0(left_outer), inner))
+            Box::new(move |left_outer| self.0.clone()(reader(left_outer))),
+            Box::new(move |left_outer, inner| {
+                left.1.clone()(
+                    left_outer.clone(),
+                    self.1.clone()(left.0.clone()(left_outer), inner),
+                )
             }),
         )
     }
@@ -57,11 +69,14 @@ impl<'f, Outer: Clone, Inner: Clone> Lens<'f, Outer, Inner> {
         RightInner: 'f,
         Outer: 'f,
     {
-        let reader = (self.0).clone();
+        let reader = self.0.clone();
         Lens(
-            Box::new(|outer| right.0(reader(outer))),
-            Box::new(|outer, right_inner| {
-                self.1(outer.clone(), right.1(self.0(outer), right_inner))
+            Box::new(move |outer| right.0.clone()(reader(outer))),
+            Box::new(move |outer, right_inner| {
+                self.1.clone()(
+                    outer.clone(),
+                    right.1.clone()(self.0.clone()(outer), right_inner),
+                )
             }),
         )
     }

@@ -1,6 +1,6 @@
 use crate::Fx;
 
-use super::{Pair, State};
+use crate::{Pair, State};
 
 impl<'f, V: Clone> Fx<'f, (), V> {
     pub fn pure(value: V) -> Self {
@@ -33,7 +33,7 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         U: Clone,
         F: FnOnce(V) -> U + Clone + 'f,
     {
-        self.map_m(|v| Fx::value(f(v)))
+        self.map_m(move |v| Fx::value(f(v)))
     }
 
     pub fn flat_map<R, U, P, F>(self, f: F) -> Fx<'f, P, U>
@@ -46,7 +46,7 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
     {
         self.adapt(
             |p: P| p.fst(),
-            |_, s, v| {
+            move |_, s, v| {
                 f(v).adapt(
                     |p: P| p.snd(),
                     |_, r, u| Fx::value(u).contra_map(|_| P::from((s, r)), |_, p| p),
@@ -82,8 +82,8 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         Setter: FnOnce(Outer, S) -> Outer + Clone + 'f,
     {
         self.adapt(
-            |t: Outer| getter(t),
-            |t, s, v| Fx::immediate(setter(t, s), v),
+            move |t: Outer| getter(t),
+            move |t, s, v| Fx::immediate(setter(t, s), v),
         )
     }
 }
