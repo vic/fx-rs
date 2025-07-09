@@ -30,5 +30,4 @@ where
 }
 
 impl<I, O> HasPut<I> for O where O: Has<I> + Put<I> {}
-
 clone_trait_object!(<T> Has<T>);

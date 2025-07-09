@@ -2,8 +2,8 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, parse_macro_input};
 
-#[proc_macro_derive(Field)]
-pub fn derive_field(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(HasFields)]
+pub fn derive_has_fields(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
     let generics = &input.generics;
@@ -11,14 +11,14 @@ pub fn derive_field(input: TokenStream) -> TokenStream {
 
     let fields = match &input.data {
         Data::Struct(data) => &data.fields,
-        _ => panic!("Field derive macro only supports named structs"),
+        _ => panic!("HasFields derive macro only supports named structs"),
     };
 
     let mut impls = Vec::new();
     for field in fields {
         let field_name = match &field.ident {
             Some(ident) => ident,
-            None => panic!("Field derive macro does not support unnamed or tuple fields"),
+            None => panic!("HasFields derive macro does not support unnamed or tuple fields"),
         };
         let field_ty = &field.ty;
         impls.push(quote! {

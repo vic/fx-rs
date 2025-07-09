@@ -5,7 +5,7 @@ use fx_do::fx_do;
 struct A(u8);
 #[derive(Clone, Debug, PartialEq)]
 struct B(u8);
-#[derive(Clone, Debug, PartialEq, fx_field::Field)]
+#[derive(Clone, Debug, PartialEq, fx_field::HasFields)]
 struct Ctx {
     a: A,
     b: B,
