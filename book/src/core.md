@@ -1,9 +1,22 @@
 # Core Effects
 
-The list of effects provided by `Fx.go` will increase as we see the need for them and as long as they provide useful on Golang programs.
+The list of effects provided by `fx-rs` will grow as new needs are discovered in Rust programs.
 
-Current Ideas for contributions:
+Current ideas for contributions:
 
-- Resource management (reserve/use/release shared resources)
-- Structured concurrency (instead of manually using mutex/channels)
-- any other idea you find useful, [Issues and PRs](https://github.com/vic/fx.go) are welcome!
+- Resource management (safe acquire/use/release of resources)
+- Structured concurrency (beyond manual mutex/channels)
+- Any other effectful pattern useful in Rust—issues and PRs are welcome!
+
+```rust
+// Type alias for a function effect
+type StringToUsize = Fx<String, usize>;
+
+fn length_of_string(s: String) -> usize { s.len() }
+
+let effect: StringToUsize = Fx::func(length_of_string);
+let requirement = "Hello World".to_owned();
+let provided = effect.provide(requirement.clone());
+let result: usize = provided.eval();
+assert_eq!(result, requirement.len()); // result: usize
+```
