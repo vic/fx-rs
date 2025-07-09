@@ -2,7 +2,7 @@ use fx::Has;
 
 #[test]
 fn test_field_struct() {
-    #[derive(Clone, Debug, PartialEq, fx_field::Field)]
+    #[derive(Clone, Debug, PartialEq, fx_field::HasFields)]
     struct Ctx {
         a: u32,
         b: &'static str,
