@@ -1,39 +1,36 @@
 # Concepts Tour
 
-This section will try to introduce you to the concepts of
-_Effects_, _Abilities_ and _Handlers_ as present in `Fx.go`.
+This section introduces the concepts of _Effects_, _Abilities_, and _Handlers_ as present in `fx-rs`.
 
-No knowledge or previous experience with other effect sytems
-is expected. We will try to explain things by
-working out from simple concepts to more interesting ones.
+No prior experience with other effect systems is required. We explain concepts from simple to advanced, using Rust idioms.
 
 ## Effects
 
-An *Effect* ( `Fx[S, V]` read: `V` provided `S` ) is the _description_ of a program that computes `V`, *provided* that the requirement `S` is present, so that the computation of `V` can be performed.
+An *Effect* (`Fx<S, V>`, read: "V given S") is a _description_ of a program that computes `V`, provided that the requirement `S` is present.
 
-Since effects are *description*s of programs, they compute nothing nor produce side-effects until they are finally evaluated, once all their requirements are at met.
+Effects are descriptions of programs; they compute nothing and produce no side-effects until they are evaluated, once all requirements are met.
 
-Some people also use the *recipe* analogy for effects: you first have a precise description of each step it takes to cook something, along with a list of the requirements for it (the ingredients and utencils you will use) and once you have them all, you can actually perform the recipe.
+A common analogy is a recipe: you have a description of steps and a list of requirements (ingredients and utensils). Once you have them all, you can perform the recipe.
 
 ## Abilities
 
-In `Fx[S, V]`, `S` is said to be the *Ability* (sometimes also referred as the _set_ of *Abilities*, *Capabilities*, *Effect Environment* or *Effect Requirements*) that are needed for computing `V`.
+In `Fx<S, V>`, `S` is the *Ability* (sometimes called the set of Abilities, Capabilities, or Effect Environment) needed to compute `V`.
 
-Abilities describe the external resources that would be needed, as well as the _side-effects_ that are possible while computing `V`.
+Abilities describe the external resources or side-effects possible while computing `V`.
 
-Examples of such Abilities are:
+Examples:
 
-- network abilities (eg, performing http requests)
-- console abilities (eg, printing to the terminal or reading user input)
-- non-deterministic abilities (eg, generating random numbers or coin-flips)
-- resource handling (eg, disciplined acquire/use/release of shared/limited resources)
-- exception handling (eg, interruption/resumption and finalizers)
-- anything else that interacts with the world outside of the program.
+- network abilities (e.g., HTTP requests)
+- console abilities (e.g., printing, reading input)
+- non-deterministic abilities (e.g., random numbers)
+- resource handling (e.g., managing shared resources)
+- exception handling (e.g., interruption, finalizers)
+- anything else that interacts with the outside world
 
 ## Handlers
 
-A *Handler* for the `S` ability is a particular _interpretation_ of what `S` means.
+A *Handler* for an ability is a particular _interpretation_ of what that ability means.
 
-Handlers are the only _side-effectful_ portion of your programs. It is possible, and quite common, to have different handlers (interpretations) for the same Ability, and each Handler decides _how/when_ to perform world-modifying _side-effects_.
+Handlers are the only side-effectful part of your programs. You can have different handlers for the same ability, and each handler decides how and when to perform world-modifying side-effects.
 
-For example, for an _http-request_ ability you can have a *test-handler* that just mock responses to fixed values so that you can easily assert on known values on your tests. You could also have a *live-handler* that actually performs requests via the network for production runs.
+For example, for an HTTP ability, you can have a test handler that mocks responses for tests, or a live handler that performs real network requests in production.

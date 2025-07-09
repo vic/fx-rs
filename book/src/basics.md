@@ -1,57 +1,54 @@
-# Basic Effects on `Fx.go`
+# Basic Effects in `fx-rs`
 
-This section expands on [Concepts](concepts.html) and shows how they relate to the `Fx.go` API, as well as providing a basic intuition on Effect requirements and evaluation.
+This section expands on [Concepts](concepts.html) and shows how they relate to the `fx-rs` API, providing intuition on effect requirements and evaluation in Rust.
 
-## `Pure[V]`: Immediate Effects
+## `Fx<(), V>`: Immediate Effects
 
-The most basic of all possible effects are *Immediate* effects. These are effects of type `Fx[Nil, V]`, meaning that they have no ability requirements (`Nil`) and evaluate to a value (`V`).
+The most basic effects are *immediate* effects. These are of type `Fx<(), V>`, meaning they have no ability requirements and evaluate to a value `V`.
 
-Immediate effects are created using the `Pure(V) Fx[Nil, V]` function.
+Immediate effects are created using `Fx::pure(value)` or `Fx::value(value)`.
 
-As you can see, `Pure(V)` takes an *existing* value `V`, that means that a pure effect just holds an already known value instead of trying to compute it.
+A pure effect just holds an already known value instead of computing it.
 
-The value given to `Pure` can be retrieved by using `Eval(Fx[Nil, V]) V`. Only effects that have no requirements (`Nil`) can be evaluated.
+The value can be retrieved by calling `.eval()` on the effect. Only effects with no requirements (`()`) can be evaluated directly.
 
-```go
-import ( fx "github.com/vic/fx.go" )
+```rust
+use fx::Fx;
 
-func PureExample() {
-    v := "Hello World"
-    // Code annotated with types for clarity
-    var effect fx.Fx[fx.Nil, string] = fx.Pure(v)
-    var result string = fx.Eval(effect)
-    assert(result == v)
+// Type alias for a simple effect with no requirements
+type PureString = Fx<(), String>;
+
+let v = "Hello World".to_owned();
+let effect: PureString = Fx::pure(v.clone());
+let result: String = effect.eval();
+assert_eq!(result, v); // result: String
 }
 ```
 
-## `Fx[S, V]`: Pending effects
+## `Fx<S, V>`: Pending Effects
 
-An effect `Fx[S, V]` where `S != Nil` is a pending effect that needs `S` to be _provided_ for computing `V`.
+An effect `Fx<S, V>` where `S` is not `()` is a pending effect that needs `S` to be provided before computing `V`.
 
-The most basic pending computation is one you are already familiar with: *A function*.
+The most basic pending computation is a function. For example, a function from `String` to `usize` can be expressed as an effect of type `Fx<String, usize>`:
 
-In the following example, the function `LengthOfString(string) int` can be expressed as an Effect of type `Fx[string, int]`. Meaning that in order to have a value of `int` you need first to provide an `string` value:
+```rust
+use fx::Fx;
 
-```go
-func LengthOfString(s string) int {
-    return len(s)
+fn length_of_string(s: String) -> usize {
+    s.len()
 }
 
-func FuncExample() {
-    // Code annotated with types for clarity
-    var effect fx.Fx[string, int] = fx.Func(LengthOfString)
-    var requirement string = "Hello World"
-    var provided fx.Fx[fx.Nil, int] = fx.Provide(effect, requirement)
-    var result int = fx.Eval(provided)
-    assert(result == len(requirement))
+fn func_example() {
+    let effect: Fx<String, usize> = Fx::func(length_of_string);
+    let requirement = "Hello World".to_owned();
+    let provided = effect.provide(requirement.clone());
+    let result = provided.eval();
+    assert_eq!(result, requirement.len());
 }
 ```
 
-From the code above:
+- `Fx::func(f)` produces a pending effect of type `Fx<S, V>` from a function `f: S -> V`.
+- `.provide(value)` discharges the requirement and returns `Fx<(), V>`. No computation is performed until `.eval()` is called.
+- `.eval()` performs the computation, since all requirements have been provided.
 
-- `Func(func (S) V)` produces a _pending_ effect of type `Fx[S, V]`.
-- `Provide(Fx[S, V], S)` discharges the `S` requirement and returns `Fx[Nil, V]`.\
-  Note that *no computation* is performed in this step. `Fx[Nil, V]` is still a description of a program, and `V` has not been computed yet, nor any side-effect has been performed.
-- `Eval(Fx[Nil, V])` will actually perform the computation of `V`. Since all `non-Nil` requirements have already been provided, the computation can be run.
-
-These two are the most basic effects in `Fx.go`. More interesting effects will be presented as we explore the topics of effect Rquests and Handlers.
+These are the most basic effects in `fx-rs`. More interesting effects are presented in later chapters.

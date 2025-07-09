@@ -1,60 +1,54 @@
 # Handlers
 
-A _Handler_ is an effect transformation function of type `func(Fx[R, U]) Fx[S, V]`.
+A _Handler_ is an effect transformation function of type `impl Handler<'f, R, S, U, V>` (see the `Handler` trait in fx-rs).
 
-Handlers are free to change the effect requirements, they tipically reduce the requirement set, but they could also introduce new requirements. They can also change or keep the result type.
+Handlers can change effect requirements, typically reducing them, but may also introduce new requirements or change the result type.
 
-## Handling an effect
+## Handling an Effect
 
-Lets re-write our previous "length of string" function as a Handler.
+Let's rewrite the "length of string" function as a handler in Rust:
 
-```go
-type LenFn func(string) Fx[Nil, int]
+```rust
+use fx::Fx;
+use fx::Handler;
 
-// Code is type annotated for clarity
-var lenFx Fx[And[LenFn, Nil], int] = fx.Suspend[LenFn]("hello")
+// Type alias for handler effect
+type RWHandler = Fx<Env, Output>;
 
-// type of a handler. not needed but added for clarity.
-type LenHn func(Fx[And[LenFn, Nil], int]) Fx[Nil, int]
+// Handler that takes Fx<(LenFn, ()), usize> and returns Fx<(), usize>
+let len_handler: RWHandler = |fx: Fx<'static, (fn(String) -> Fx<'static, (), usize>, ()), usize>| {
+    fx.provide_left(|s: String| Fx::pure(s.len()))
+};
 
-var handler LenHn = fx.Handler(func(s string) fx.Fx[fx.Nil, int] {
-    return fx.Pure(len(s))
-})
-
-// apply the handler directly to lenFx
-var x *int = fx.Eval(handler(lenFx))
-assert(*x == 5)
+let effect: Fx<'static, (fn(String) -> Fx<'static, (), usize>, ()), usize> = Fx::func(|s: String| Fx::pure(s.len()));
+let handled: Fx<'static, (), usize> = len_handler.handle(effect);
+let result = handled.eval();
+assert_eq!(result, "hello".len());
 ```
 
-As you might guess, `fx.Handler` is just a wrapper for `ProvideLeft(Fx[And[Fn, S], O], Fn) Fx[S, O]` where `Fn = func(I) Fx[S, O]`, an request-effect function.
+## Requesting Handlers from the Environment
 
-## Requesting Handlers (effect-transformers) from the environment.
+You can also request that a handler be present as a requirement. This way, the handler is provided once and can be applied anywhere in the program.
 
-Of course, you can also request that a particular effect transformer (Handler) be present as a requirement of some computation. This way the handler is provided only once but can be applied anywhere it is needed inside the program.
+```rust
+use fx::Fx;
+use fx::Handler;
 
-```go
-// Same examples as above with some more types for clarity
+// Type alias for handler effect
+type RWHandler = Fx<Env, Output>;
 
-// effect-request function type.
-type LenFn func(string) Fx[Nil, int]
-// effect handler type
-type LenHn = func(Fx[And[LenFn, Nil], int]) Fx[Nil, int]
+let len_handler: RWHandler = |fx: Fx<'static, (fn(String) -> Fx<'static, (), usize>, ()), usize>| {
+    fx.provide_left(|s: String| Fx::pure(s.len()))
+};
 
-// effect ability
-type LenAb = And[LenHn, Nil]
-// effect type producing V
-type LenFx[V any] = fx.Fx[LenAb, V]
-
-// Same as: Suspend[LenHn](Suspend[LenFn](input))
-var lenFx LenFx = fx.Handle[LenHn]("hello")
-
-var handler LenHn = fx.Handler(func(s string) fx.Fx[fx.Nil, int] {
-    return fx.Pure(len(s))
-})
-
-// Now instead of applying the handler directly to each effect
-// we provide it into the environment.
-var provided Fx[Nil, int] = fx.ProvideLeft(lenFx, handler)
-val x int = fx.Eval(provided)
-assert(x == 5)
+let effect: Fx<'static, (fn(String) -> Fx<'static, (), usize>, ()), usize> = Fx::func(|s: String| Fx::pure(s.len()));
+let provided = effect.provide_left(len_handler);
+let result = provided.eval();
+assert_eq!(result, "hello".len());
 ```
+
+Handlers in fx-rs are just values and can be passed, composed, or swapped as needed.
+
+A **Handler** in fx-rs is a transformation: it takes an input (often an effectful request or ability) and produces a new effect. Conceptually, a handler is a function that interprets or transforms effects, often by providing implementations for abilities or by composing/rewriting effects. See the comment in `handler.rs` for details.
+
+An **Ability** is a trait or type that represents a capability or effectful operation. In fx-rs, an ability is conceptually a function of the form `I => Fx<S, O>`, meaning it takes an input `I` and returns an effectful computation producing an output `O` and possibly requiring further abilities `S`. See the comment in `ability.rs` for the canonical definition.
