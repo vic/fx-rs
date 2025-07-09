@@ -1,9 +1,10 @@
-use crate::State;
 use std::fmt::Debug;
+
+use crate::{core::state::State, kernel::fx::Fx};
 
 fn law_get_set_roundtrip<T>(init: T)
 where
-    T: Debug + Clone + PartialEq,
+    T: Clone + PartialEq + Debug,
 {
     let fx = State::<T>::get();
     let s1 = fx.provide(init.clone()).eval();
@@ -20,7 +21,7 @@ fn test_state_get_set_roundtrip() {
 
 fn law_set_idempotent<T>(init: T, set_val: T)
 where
-    T: Debug + Clone + PartialEq,
+    T: Clone + PartialEq + Debug,
 {
     let fx = State::set(set_val.clone())
         .then(State::set(set_val.clone()))
@@ -36,7 +37,6 @@ fn test_state_set_idempotent() {
 }
 
 fn law_state_acc_commute(init_state: i32, init_acc: Vec<i32>, input: i32) {
-    use crate::Fx;
     let fx = Fx::pending(|(_state, mut acc): (i32, Vec<i32>)| {
         let state = input;
         let s2 = state * 2;
@@ -61,7 +61,6 @@ struct NestedCtx {
 }
 
 fn law_struct_nested_quantification(init_state: i32, init_acc: Vec<i32>, input: i32) {
-    use crate::Fx;
     let fx = Fx::pending(|mut ctx: NestedCtx| {
         ctx.state = input;
         ctx.acc.push(input);

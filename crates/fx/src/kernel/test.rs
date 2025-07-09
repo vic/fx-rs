@@ -1,4 +1,4 @@
-use crate::Fx;
+use super::fx::Fx;
 
 #[test]
 fn eval_immediate() {

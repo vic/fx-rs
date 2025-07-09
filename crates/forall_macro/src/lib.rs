@@ -2,6 +2,7 @@
 //! Usage examples are provided as test cases in tests/forall_fields.rs
 
 extern crate proc_macro;
+
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, parse_macro_input};

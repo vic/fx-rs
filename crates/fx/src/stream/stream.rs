@@ -1,4 +1,6 @@
-use crate::{Acc, Fx, State};
+use crate::core::acc::Acc;
+use crate::core::state::State;
+use crate::kernel::fx::Fx;
 
 #[derive(Clone)]
 pub enum Item<T> {
@@ -64,7 +66,7 @@ impl<'f, S: Clone, I: Clone> Stream<'f, S, I> {
             .contra_map(|(s, (a, r))| ((s, a), r), |_, ((s, a), r)| (s, (a, r)))
     }
 
-    fn fold_stream_rec<A, F>(current: A, stream: StreamFx<'f, S, I>, f: F) -> Fx<'f, S, A>
+    pub fn fold_stream_rec<A, F>(current: A, stream: StreamFx<'f, S, I>, f: F) -> Fx<'f, S, A>
     where
         A: Clone + 'f,
         F: FnOnce(A, I) -> Fx<'f, S, Item<A>> + Clone + 'f,

@@ -1,11 +1,7 @@
-use crate::{Ability, Fx, Handler, State};
-
-/// An ability that has an accumulator as part of its environment.
-pub type AccAbility<'f, I, S, O, A> = Ability<'f, I, (A, S), O>;
-
-/// Folds an ability outcome O into an accumulator A.
-pub type AccHandler<'f, I, S, O, A, V> =
-    Handler<'f, (AccAbility<'f, I, S, O, A>, (A, S)), S, V, (A, V)>;
+use crate::{
+    core::{ability::AbilityExt, handler::Handler, state::State},
+    kernel::{ability::Ability, fx::Fx},
+};
 
 /// An effectful accumulator of I
 pub trait Acc<'f, S: Clone, I>: Clone {
@@ -27,60 +23,83 @@ impl<'f, S: Clone, I: Clone> Acc<'f, S, I> for Vec<I> {
     }
 }
 
-impl<'f, I, S, O, A> AccAbility<'f, I, S, O, A>
+pub trait AccAbilityExt<'f, I, S, O, A>:
+    Ability<'f, I, (A, S), O> + AbilityExt<'f, I, (A, S), O> + Clone + 'f
 where
-    I: Clone,
-    S: Clone,
-    O: Clone,
-    A: Clone,
+    I: Clone + 'f,
+    S: Clone + 'f,
+    O: Clone + 'f,
+    A: Clone + 'f,
 {
-    pub fn acc_outcome_with<V: Clone, F>(self, acc: A, f: F) -> AccHandler<'f, I, S, O, A, V>
+    fn acc_outcome_with<V: Clone + 'f, F>(
+        self,
+        acc: A,
+        f: F,
+    ) -> impl Handler<'f, (Box<dyn Ability<'f, I, (A, S), O> + 'f>, (A, S)), S, V, (A, V)> + Clone + 'f
     where
         F: FnOnce(A, O) -> Fx<'f, S, A> + Clone + 'f,
+        Self: Sized + 'f,
     {
-        acc_handler(self, acc, f)
+        acc_handler(Box::new(self), acc, f)
     }
 
-    pub fn acc_outcome<V: Clone>(self, acc: A) -> AccHandler<'f, I, S, O, A, V>
+    fn acc_outcome<V: Clone + 'f>(
+        self,
+        acc: A,
+    ) -> impl Handler<'f, (Box<dyn Ability<'f, I, (A, S), O> + 'f>, (A, S)), S, V, (A, V)> + Clone + 'f
     where
         A: Acc<'f, S, O>,
+        Self: Sized + 'f,
     {
-        acc_handler(self, acc, |acc, i| acc.acc_fx(i))
+        acc_handler(Box::new(self), acc, |acc, i| acc.acc_fx(i))
     }
 
-    pub fn acc_outcome_default<V: Clone>(self) -> AccHandler<'f, I, S, O, A, V>
+    fn acc_outcome_default<V: Clone + 'f>(
+        self,
+    ) -> impl Handler<'f, (Box<dyn Ability<'f, I, (A, S), O> + 'f>, (A, S)), S, V, (A, V)> + Clone + 'f
     where
         A: Acc<'f, S, O> + Default,
+        Self: Sized + 'f,
     {
         self.acc_outcome(Default::default())
     }
 }
 
+impl<'f, I, S, O, A, T> AccAbilityExt<'f, I, S, O, A> for T
+where
+    I: Clone + 'f,
+    S: Clone + 'f,
+    O: Clone + 'f,
+    A: Clone + 'f,
+    T: Ability<'f, I, (A, S), O> + AbilityExt<'f, I, (A, S), O> + Clone + 'f,
+{
+}
+
 fn acc_handler<'f, A, V, I, S, O, F>(
-    ab: AccAbility<'f, I, S, O, A>,
+    ab: Box<dyn Ability<'f, I, (A, S), O> + 'f>,
     a: A,
     op: F,
-) -> AccHandler<'f, I, S, O, A, V>
+) -> impl Handler<'f, (Box<dyn Ability<'f, I, (A, S), O> + 'f>, (A, S)), S, V, (A, V)> + Clone + 'f
 where
-    A: Clone,
-    I: Clone,
-    S: Clone,
-    O: Clone,
-    V: Clone,
+    A: Clone + 'f,
+    I: Clone + 'f,
+    S: Clone + 'f,
+    O: Clone + 'f,
+    V: Clone + 'f,
     F: FnOnce(A, O) -> Fx<'f, S, A> + Clone + 'f,
 {
-    Handler::new(|e| {
-        let ab = ab.hmap(|f| {
+    move |e: Fx<'f, (Box<dyn Ability<'f, I, (A, S), O> + 'f>, (A, S)), V>| {
+        let ab_boxed: Box<dyn Ability<'f, I, (A, S), O> + 'f> = Box::new(ab.clone().hmap(|f| {
             f.map_m(|o| {
                 let o1 = o.clone();
                 State::update(|(a, s): (A, S)| op(a, o1).map(|a| (a, s)))
                     .map(|_| o)
                     .contra_map(|(a, s): (A, S)| ((a, s.clone()), s), |_, (st, _)| st)
             })
-        });
+        }));
 
-        e.provide_left(ab)
+        e.provide_left(ab_boxed)
             .map_m(|v| State::get().map(|(a, _)| (a, v)))
             .provide_left(a)
-    })
+    }
 }

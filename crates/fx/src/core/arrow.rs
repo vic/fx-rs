@@ -1,69 +1,65 @@
-use super::handler::Handler;
-use crate::{Fx, Pair, State};
-use dyn_clone::{DynClone, clone_trait_object};
+use crate::{
+    core::{handler::Handler, pair::Pair, state::State},
+    kernel::fx::Fx,
+};
 
-impl<'f, I, O> Arrow<'f, I, O>
+pub struct Arrows;
+impl Arrows {
+    pub fn request<'f, I, O, A>(i: I) -> Fx<'f, A, O>
+    where
+        I: Clone + 'f,
+        O: Clone + 'f,
+        A: Arrow<'f, I, O> + Clone + 'f,
+    {
+        State::get().map(|f: A| f.apply(i))
+    }
+
+    pub fn new<'f, I, O, F>(f: F) -> impl Arrow<'f, I, O> + Clone + 'f
+    where
+        I: Clone + 'f,
+        O: Clone + 'f,
+        F: FnOnce(I) -> O + Clone + 'f,
+    {
+        f
+    }
+}
+
+impl<'f, I, O, F> Arrow<'f, I, O> for F
 where
-    O: Clone,
+    O: Clone + 'f,
     I: Clone + 'f,
+    F: FnOnce(I) -> O + Clone + 'f,
 {
-    pub fn request(i: I) -> Fx<'f, Self, O>
-    where
-        I: Clone,
-    {
-        State::get().map(|f: Self| f.apply(i))
+    fn apply(self, i: I) -> O {
+        self(i)
     }
+}
 
-    pub fn handler<B, V, P, F>(f: F) -> Handler<'f, P, B, V, V>
-    where
-        F: FnOnce(I) -> O + Clone + 'f,
-        B: Clone,
-        V: Clone,
-        P: Pair<Self, B>,
-    {
-        Handler::new(|e| e.provide_left(Self::new(f)))
-    }
+pub trait Arrow<'f, I, O>
+where
+    O: Clone + 'f,
+    I: Clone + 'f,
+    Self: Clone + 'f,
+{
+    fn apply(self, i: I) -> O;
 
-    pub fn new<F>(f: F) -> Self
+    fn handler<B, V, P, F>(self) -> impl Handler<'f, P, B, V, V>
     where
         F: FnOnce(I) -> O + Clone + 'f,
+        B: Clone + 'f,
+        V: Clone + 'f,
+        P: Pair<Self, B> + 'f,
     {
-        Self(Box::new(f))
+        |e: Fx<'f, P, V>| e.provide_left(self)
     }
 
-    pub fn apply(self, i: I) -> O {
-        self.0(i)
-    }
-
-    pub fn clone_boxed(&self) -> Box<dyn FnOnce(I) -> O + 'f> {
-        self.0.clone()
-    }
-
-    pub fn adapt<T, U, H, F>(self, cmap: H, fmap: F) -> Arrow<'f, T, U>
+    fn adapt<T, U, H, F>(self, cmap: H, fmap: F) -> impl Arrow<'f, T, U>
     where
         T: Clone + 'f,
-        U: Clone,
+        U: Clone + 'f,
         H: FnOnce(T) -> I + Clone + 'f,
         F: FnOnce(O) -> U + Clone + 'f,
     {
-        Arrow::new(|t: T| fmap(self.apply(cmap(t))))
+        |t: T| fmap(self.apply(cmap(t)))
     }
-}
-
-#[derive(Clone)]
-pub struct Arrow<'f, I, O: Clone>(Box<dyn ArrowFn<'f, I, O> + 'f>);
-
-clone_trait_object!(<'f, I, O: Clone> ArrowFn<'f, I, O>);
-
-trait ArrowFn<'f, I, O>: DynClone + FnOnce(I) -> O
-where
-    O: Clone + 'f,
-{
-}
-
-impl<'f, I, O, F> ArrowFn<'f, I, O> for F
-where
-    F: FnOnce(I) -> O + Clone,
-    O: Clone + 'f,
-{
 }
