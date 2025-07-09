@@ -1,3 +1,4 @@
+use crate::core::has_put::{Has, HasPut};
 use crate::kernel::fx::Fx;
 
 use super::pair::Pair;
@@ -86,5 +87,56 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
             |t: Outer| getter(t),
             |t, s, v| Fx::immediate(setter(t, s), v),
         )
+    }
+
+    pub fn lift<T>(self) -> Fx<'f, T, V>
+    where
+        T: HasPut<S> + Clone + 'f,
+        S: Clone + 'f,
+        V: Clone + 'f,
+    {
+        self.contra_map(|t: T| t.get().clone(), |t, s| t.put(s))
+    }
+
+    pub fn zip<V2>(self, other: Fx<'f, S, V2>) -> Fx<'f, S, (V, V2)>
+    where
+        S: Clone + 'f,
+        V: Clone + 'f,
+        V2: Clone + 'f,
+    {
+        self.map_m(move |v| other.clone().map(move |v2| (v.clone(), v2)))
+    }
+
+    pub fn zip_left<V2>(self, other: Fx<'f, S, V2>) -> Fx<'f, S, V>
+    where
+        S: Clone + 'f,
+        V: Clone + 'f,
+        V2: Clone + 'f,
+    {
+        self.map_m(move |v| other.clone().map(move |_| v.clone()))
+    }
+
+    pub fn zip_right<V2>(self, other: Fx<'f, S, V2>) -> Fx<'f, S, V2>
+    where
+        S: Clone + 'f,
+        V: Clone + 'f,
+        V2: Clone + 'f,
+    {
+        self.map_m(move |_| other.clone())
+    }
+}
+
+impl<'f, S: Clone> Fx<'f, S, ()> {
+    pub fn has_pending<X, V, F>(f: F) -> Fx<'f, S, V>
+    where
+        S: Has<X> + Clone + 'f,
+        V: Clone,
+        F: FnOnce(X) -> Fx<'f, S, V> + Clone + 'f,
+        X: Clone,
+    {
+        Fx::pending(move |ctx: S| {
+            let x = Has::get(&ctx).clone();
+            f(x)
+        })
     }
 }
