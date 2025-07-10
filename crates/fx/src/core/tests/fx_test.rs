@@ -4,6 +4,39 @@ use crate::{
 };
 use std::convert::identity;
 
+// Common structs and trait implementations for all tests
+#[derive(Clone, Debug, PartialEq)]
+struct A(pub i32);
+#[derive(Clone, Debug, PartialEq)]
+struct B(pub i32);
+#[derive(Clone, Debug, PartialEq)]
+struct S {
+    a: A,
+    b: B,
+}
+impl Has<A> for S {
+    fn get<'f>(&'f self) -> &'f A {
+        &self.a
+    }
+}
+impl Put<A> for S {
+    fn put(mut self, value: A) -> Self {
+        self.a = value;
+        self
+    }
+}
+impl Has<B> for S {
+    fn get<'f>(&'f self) -> &'f B {
+        &self.b
+    }
+}
+impl Put<B> for S {
+    fn put(mut self, value: B) -> Self {
+        self.b = value;
+        self
+    }
+}
+
 #[test]
 fn pure() {
     let e = Fx::pure(22);
@@ -80,46 +113,14 @@ fn flat_map() {
 
 #[test]
 fn lifts_fx_to_larger_context() {
-    #[derive(Clone, Debug, PartialEq)]
-    struct A(i32);
-    #[derive(Clone, Debug, PartialEq)]
-    struct B(&'static str);
-    #[derive(Clone, Debug, PartialEq)]
-    struct S {
-        a: A,
-        b: B,
-    }
-    impl Has<A> for S {
-        fn get<'f>(&'f self) -> &'f A {
-            &self.a
-        }
-    }
-    impl Put<A> for S {
-        fn put(mut self, value: A) -> Self {
-            self.a = value;
-            self
-        }
-    }
-    impl Has<B> for S {
-        fn get<'f>(&'f self) -> &'f B {
-            &self.b
-        }
-    }
-    impl Put<B> for S {
-        fn put(mut self, value: B) -> Self {
-            self.b = value;
-            self
-        }
-    }
-
     let fx_a: Fx<A, i32> = Fx::pending(|a: A| Fx::value(a.0 + 1));
-    let fx_b: Fx<B, i32> = Fx::pending(|b: B| Fx::value(b.0.len() as i32));
+    let fx_b: Fx<B, i32> = Fx::pending(|b: B| Fx::value(b.0));
     // This should work: lift to anything that Has<A>, Has<B> respectively.
     let lifted_a: Fx<S, i32> = fx_a.lift();
     let lifted_b: Fx<S, i32> = fx_b.lift();
     let s = S {
         a: A(41),
-        b: B("hi!"),
+        b: B(3),
     };
     assert_eq!(lifted_a.provide(s.clone()).eval(), 42);
     assert_eq!(lifted_b.provide(s.clone()).eval(), 3);
@@ -145,44 +146,13 @@ fn zip_and_zip_left_and_zip_right() {
 
 #[test]
 fn zip_lifted_fx_on_struct_with_has_a_and_b() {
-    #[derive(Clone, Debug, PartialEq)]
-    struct A(i32);
-    #[derive(Clone, Debug, PartialEq)]
-    struct B(&'static str);
-    #[derive(Clone, Debug, PartialEq)]
-    struct S {
-        a: A,
-        b: B,
-    }
-    impl Has<A> for S {
-        fn get<'f>(&'f self) -> &'f A {
-            &self.a
-        }
-    }
-    impl Put<A> for S {
-        fn put(mut self, value: A) -> Self {
-            self.a = value;
-            self
-        }
-    }
-    impl Has<B> for S {
-        fn get<'f>(&'f self) -> &'f B {
-            &self.b
-        }
-    }
-    impl Put<B> for S {
-        fn put(mut self, value: B) -> Self {
-            self.b = value;
-            self
-        }
-    }
     let fx_a: Fx<A, i32> = Fx::pending(|a: A| Fx::value(a.0 + 1));
-    let fx_b: Fx<B, i32> = Fx::pending(|b: B| Fx::value(b.0.len() as i32));
+    let fx_b: Fx<B, i32> = Fx::pending(|b: B| Fx::value(b.0));
     let lifted_a: Fx<S, i32> = fx_a.lift();
     let lifted_b: Fx<S, i32> = fx_b.lift();
     let s = S {
         a: A(41),
-        b: B("hi!"),
+        b: B(3),
     };
     let zipped = lifted_a.zip(lifted_b);
     assert_eq!(zipped.provide(s).eval(), (42, 3));
@@ -223,6 +193,7 @@ fn has_pending_struct() {
 
 #[test]
 fn has_pending_composed() {
+    #[allow(dead_code)]
     #[derive(Clone)]
     struct Ctx {
         x: i32,
@@ -241,37 +212,6 @@ fn has_pending_composed() {
 
 #[test]
 fn lift_map_composes_effects_with_hasput() {
-    #[derive(Clone, Debug, PartialEq)]
-    struct A(i32);
-    #[derive(Clone, Debug, PartialEq)]
-    struct B(i32);
-    #[derive(Clone, Debug, PartialEq)]
-    struct S {
-        a: A,
-        b: B,
-    }
-    impl Has<A> for S {
-        fn get<'f>(&'f self) -> &'f A {
-            &self.a
-        }
-    }
-    impl Put<A> for S {
-        fn put(mut self, value: A) -> Self {
-            self.a = value;
-            self
-        }
-    }
-    impl Has<B> for S {
-        fn get<'f>(&'f self) -> &'f B {
-            &self.b
-        }
-    }
-    impl Put<B> for S {
-        fn put(mut self, value: B) -> Self {
-            self.b = value;
-            self
-        }
-    }
     let a: Fx<A, A> = Fx::func(|a: A| A(a.0 + 1));
     let b = |a: A| Fx::func(move |b: B| ((a.0 + b.0) * 2));
     let composed: Fx<S, i32> = a.lift_map(b);
