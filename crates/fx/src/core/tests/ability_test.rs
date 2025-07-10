@@ -1,11 +1,10 @@
+use crate::core::ability::{Abilities, AbilityExt};
+use crate::core::handler::Handler;
+use crate::core::has_put::{Has, Put};
+use crate::core::state::State;
+use crate::kernel::ability::Ability;
+use crate::kernel::fx::Fx;
 use std::usize;
-
-use crate::{
-    core::ability::{Abilities, AbilityExt},
-    core::handler::Handler,
-    core::state::State,
-    kernel::{ability::Ability, fx::Fx},
-};
 
 fn modify_and_continue_delimited_continuation<'f, A>(ability: A)
 where
@@ -86,4 +85,51 @@ fn ability_hmap_maps_handler() {
     let fx = fx.via(ab2.handler());
     let result = fx.eval();
     assert_eq!(result, 22);
+}
+
+#[test]
+fn lift_req_composes_ability_and_state() {
+    #[derive(Clone)]
+    struct MyAbility;
+    impl<'f> Ability<'f, usize, i32, usize> for MyAbility {
+        fn apply(&self, i: usize) -> Fx<'f, i32, usize> {
+            Fx::pending(move |n: i32| Fx::value(i + n as usize))
+        }
+    }
+
+    #[derive(Clone)]
+    struct Ctx {
+        ab: MyAbility,
+        n: i32,
+    }
+    impl Has<MyAbility> for Ctx {
+        fn get<'f>(&'f self) -> &'f MyAbility {
+            &self.ab
+        }
+    }
+    impl Put<MyAbility> for Ctx {
+        fn put(mut self, ab: MyAbility) -> Self {
+            self.ab = ab;
+            self
+        }
+    }
+    impl Has<i32> for Ctx {
+        fn get<'f>(&'f self) -> &'f i32 {
+            &self.n
+        }
+    }
+    impl Put<i32> for Ctx {
+        fn put(mut self, n: i32) -> Self {
+            self.n = n;
+            self
+        }
+    }
+
+    let fx = Abilities::lift_req::<Ctx, MyAbility>(7);
+    let ctx = Ctx {
+        ab: MyAbility,
+        n: 5,
+    };
+    let result = fx.provide(ctx).eval();
+    assert_eq!(result, 12);
 }
