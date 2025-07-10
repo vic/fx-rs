@@ -118,10 +118,7 @@ fn lifts_fx_to_larger_context() {
     // This should work: lift to anything that Has<A>, Has<B> respectively.
     let lifted_a: Fx<S, i32> = fx_a.lift();
     let lifted_b: Fx<S, i32> = fx_b.lift();
-    let s = S {
-        a: A(41),
-        b: B(3),
-    };
+    let s = S { a: A(41), b: B(3) };
     assert_eq!(lifted_a.provide(s.clone()).eval(), 42);
     assert_eq!(lifted_b.provide(s.clone()).eval(), 3);
 }
@@ -150,10 +147,7 @@ fn zip_lifted_fx_on_struct_with_has_a_and_b() {
     let fx_b: Fx<B, i32> = Fx::pending(|b: B| Fx::value(b.0));
     let lifted_a: Fx<S, i32> = fx_a.lift();
     let lifted_b: Fx<S, i32> = fx_b.lift();
-    let s = S {
-        a: A(41),
-        b: B(3),
-    };
+    let s = S { a: A(41), b: B(3) };
     let zipped = lifted_a.zip(lifted_b);
     assert_eq!(zipped.provide(s).eval(), (42, 3));
 }
