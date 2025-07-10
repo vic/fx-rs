@@ -238,3 +238,43 @@ fn has_pending_composed() {
     let result = fx.provide(Ctx { x: 3, y: 4 }).eval();
     assert_eq!(result, 6); // Only x is used, y is ignored (since Has<i32> is implemented only for x)
 }
+
+#[test]
+fn lift_map_composes_effects_with_hasput() {
+    #[derive(Clone, Debug, PartialEq)]
+    struct A(i32);
+    #[derive(Clone, Debug, PartialEq)]
+    struct B(i32);
+    #[derive(Clone, Debug, PartialEq)]
+    struct S {
+        a: A,
+        b: B,
+    }
+    impl Has<A> for S {
+        fn get<'f>(&'f self) -> &'f A {
+            &self.a
+        }
+    }
+    impl Put<A> for S {
+        fn put(mut self, value: A) -> Self {
+            self.a = value;
+            self
+        }
+    }
+    impl Has<B> for S {
+        fn get<'f>(&'f self) -> &'f B {
+            &self.b
+        }
+    }
+    impl Put<B> for S {
+        fn put(mut self, value: B) -> Self {
+            self.b = value;
+            self
+        }
+    }
+    let a: Fx<A, A> = Fx::func(|a: A| A(a.0 + 1));
+    let b = |a: A| Fx::func(move |b: B| ((a.0 + b.0) * 2));
+    let composed: Fx<S, i32> = a.lift_map(b);
+    let s = S { a: A(10), b: B(7) };
+    assert_eq!(composed.provide(s).eval(), 36); // ((a + 1) + b) * 2
+}

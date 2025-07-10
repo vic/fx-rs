@@ -89,6 +89,17 @@ impl<'f, S: Clone, V: Clone> Fx<'f, S, V> {
         )
     }
 
+    // effect sequencing over HasPut requirements.
+    pub fn lift_map<R, U, P, F>(self, f: F) -> Fx<'f, P, U>
+    where
+        U: Clone + 'f,
+        R: Clone + 'f,
+        P: HasPut<S> + HasPut<R> + Clone + 'f,
+        F: FnOnce(V) -> Fx<'f, R, U> + Clone + 'f,
+    {
+        self.lift().map_m(|v| f(v).lift())
+    }
+
     pub fn lift<T>(self) -> Fx<'f, T, V>
     where
         T: HasPut<S> + Clone + 'f,
