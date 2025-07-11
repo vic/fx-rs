@@ -146,7 +146,7 @@ impl<'f, S: Clone> Fx<'f, S, ()> {
         X: Clone,
     {
         Fx::pending(move |ctx: S| {
-            let x = Has::get(&ctx).clone();
+            let x = Has::get(ctx.clone());
             f(x)
         })
     }

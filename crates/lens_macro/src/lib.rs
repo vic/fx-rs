@@ -57,8 +57,8 @@ pub fn derive_has_put(input: TokenStream) -> TokenStream {
         let fty = &f.ty;
         quote! {
             impl #impl_generics ::fx::Has<#fty> for #name #ty_generics #where_clause {
-                fn get(&self) -> &#fty {
-                    &self.#fname
+                fn get(self) -> #fty {
+                    self.#fname
                 }
             }
         }

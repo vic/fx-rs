@@ -40,13 +40,13 @@ impl Into<(i32, bool)> for S2 {
     }
 }
 impl Has<i32> for S2 {
-    fn get(&self) -> &i32 {
-        &self.x
+    fn get(self) -> i32 {
+        self.x
     }
 }
 impl Has<bool> for S2 {
-    fn get(&self) -> &bool {
-        &self.y
+    fn get(self) -> bool {
+        self.y
     }
 }
 impl Put<i32> for S2 {

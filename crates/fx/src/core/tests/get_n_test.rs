@@ -8,13 +8,13 @@ struct Ctx2 {
     b: u16,
 }
 impl Has<u8> for Ctx2 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx2 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 
@@ -25,18 +25,18 @@ struct Ctx3 {
     c: u32,
 }
 impl Has<u8> for Ctx3 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx3 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx3 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 
@@ -48,23 +48,23 @@ struct Ctx4 {
     d: u64,
 }
 impl Has<u8> for Ctx4 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx4 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx4 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx4 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 
@@ -77,28 +77,28 @@ struct Ctx5 {
     e: usize,
 }
 impl Has<u8> for Ctx5 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx5 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx5 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx5 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 impl Has<usize> for Ctx5 {
-    fn get(&self) -> &usize {
-        &self.e
+    fn get(self) -> usize {
+        self.e
     }
 }
 
@@ -112,33 +112,33 @@ struct Ctx6 {
     f: i8,
 }
 impl Has<u8> for Ctx6 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx6 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx6 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx6 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 impl Has<usize> for Ctx6 {
-    fn get(&self) -> &usize {
-        &self.e
+    fn get(self) -> usize {
+        self.e
     }
 }
 impl Has<i8> for Ctx6 {
-    fn get(&self) -> &i8 {
-        &self.f
+    fn get(self) -> i8 {
+        self.f
     }
 }
 
@@ -153,38 +153,38 @@ struct Ctx7 {
     g: i16,
 }
 impl Has<u8> for Ctx7 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx7 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx7 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx7 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 impl Has<usize> for Ctx7 {
-    fn get(&self) -> &usize {
-        &self.e
+    fn get(self) -> usize {
+        self.e
     }
 }
 impl Has<i8> for Ctx7 {
-    fn get(&self) -> &i8 {
-        &self.f
+    fn get(self) -> i8 {
+        self.f
     }
 }
 impl Has<i16> for Ctx7 {
-    fn get(&self) -> &i16 {
-        &self.g
+    fn get(self) -> i16 {
+        self.g
     }
 }
 
@@ -200,43 +200,43 @@ struct Ctx8 {
     h: i32,
 }
 impl Has<u8> for Ctx8 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx8 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx8 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx8 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 impl Has<usize> for Ctx8 {
-    fn get(&self) -> &usize {
-        &self.e
+    fn get(self) -> usize {
+        self.e
     }
 }
 impl Has<i8> for Ctx8 {
-    fn get(&self) -> &i8 {
-        &self.f
+    fn get(self) -> i8 {
+        self.f
     }
 }
 impl Has<i16> for Ctx8 {
-    fn get(&self) -> &i16 {
-        &self.g
+    fn get(self) -> i16 {
+        self.g
     }
 }
 impl Has<i32> for Ctx8 {
-    fn get(&self) -> &i32 {
-        &self.h
+    fn get(self) -> i32 {
+        self.h
     }
 }
 
@@ -253,48 +253,48 @@ struct Ctx9 {
     i: i64,
 }
 impl Has<u8> for Ctx9 {
-    fn get(&self) -> &u8 {
-        &self.a
+    fn get(self) -> u8 {
+        self.a
     }
 }
 impl Has<u16> for Ctx9 {
-    fn get(&self) -> &u16 {
-        &self.b
+    fn get(self) -> u16 {
+        self.b
     }
 }
 impl Has<u32> for Ctx9 {
-    fn get(&self) -> &u32 {
-        &self.c
+    fn get(self) -> u32 {
+        self.c
     }
 }
 impl Has<u64> for Ctx9 {
-    fn get(&self) -> &u64 {
-        &self.d
+    fn get(self) -> u64 {
+        self.d
     }
 }
 impl Has<usize> for Ctx9 {
-    fn get(&self) -> &usize {
-        &self.e
+    fn get(self) -> usize {
+        self.e
     }
 }
 impl Has<i8> for Ctx9 {
-    fn get(&self) -> &i8 {
-        &self.f
+    fn get(self) -> i8 {
+        self.f
     }
 }
 impl Has<i16> for Ctx9 {
-    fn get(&self) -> &i16 {
-        &self.g
+    fn get(self) -> i16 {
+        self.g
     }
 }
 impl Has<i32> for Ctx9 {
-    fn get(&self) -> &i32 {
-        &self.h
+    fn get(self) -> i32 {
+        self.h
     }
 }
 impl Has<i64> for Ctx9 {
-    fn get(&self) -> &i64 {
-        &self.i
+    fn get(self) -> i64 {
+        self.i
     }
 }
 
@@ -310,13 +310,13 @@ fn get2_extracts_tuple_from_context() {
         bar: Bar,
     }
     impl Has<Foo> for Ctx {
-        fn get(&self) -> &Foo {
-            &self.foo
+        fn get(self) -> Foo {
+            self.foo
         }
     }
     impl Has<Bar> for Ctx {
-        fn get(&self) -> &Bar {
-            &self.bar
+        fn get(self) -> Bar {
+            self.bar
         }
     }
     let ctx = Ctx {

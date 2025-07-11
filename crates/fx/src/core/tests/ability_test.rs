@@ -103,8 +103,8 @@ fn lift_req_composes_ability_and_state() {
         n: i32,
     }
     impl Has<MyAbility> for Ctx {
-        fn get<'f>(&'f self) -> &'f MyAbility {
-            &self.ab
+        fn get(self) -> MyAbility {
+            self.ab
         }
     }
     impl Put<MyAbility> for Ctx {
@@ -114,8 +114,8 @@ fn lift_req_composes_ability_and_state() {
         }
     }
     impl Has<i32> for Ctx {
-        fn get<'f>(&'f self) -> &'f i32 {
-            &self.n
+        fn get(self) -> i32 {
+            self.n
         }
     }
     impl Put<i32> for Ctx {

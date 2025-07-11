@@ -15,8 +15,8 @@ struct S {
     b: B,
 }
 impl Has<A> for S {
-    fn get<'f>(&'f self) -> &'f A {
-        &self.a
+    fn get(self) -> A {
+        self.a
     }
 }
 impl Put<A> for S {
@@ -26,8 +26,8 @@ impl Put<A> for S {
     }
 }
 impl Has<B> for S {
-    fn get<'f>(&'f self) -> &'f B {
-        &self.b
+    fn get(self) -> B {
+        self.b
     }
 }
 impl Put<B> for S {
@@ -157,8 +157,8 @@ fn has_pending_tuple() {
     #[derive(Clone)]
     struct N(i32);
     impl Has<N> for (N, ()) {
-        fn get(&self) -> &N {
-            &self.0
+        fn get(self) -> N {
+            self.0
         }
     }
 
@@ -176,8 +176,8 @@ fn has_pending_struct() {
         x: i32,
     }
     impl Has<i32> for Ctx {
-        fn get<'f>(&'f self) -> &'f i32 {
-            &self.x
+        fn get(self) -> i32 {
+            self.x
         }
     }
     let fx = Fx::has_pending(|x: i32| Fx::value(x * 2));
@@ -194,8 +194,8 @@ fn has_pending_composed() {
         y: i32,
     }
     impl Has<i32> for Ctx {
-        fn get<'f>(&'f self) -> &'f i32 {
-            &self.x
+        fn get(self) -> i32 {
+            self.x
         }
     }
     // Compose two has_pending calls

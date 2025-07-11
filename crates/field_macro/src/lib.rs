@@ -23,8 +23,8 @@ pub fn derive_has_fields(input: TokenStream) -> TokenStream {
         let field_ty = &field.ty;
         impls.push(quote! {
             impl #impl_generics ::fx::Has<#field_ty> for #name #ty_generics #where_clause {
-                fn get(&self) -> &#field_ty {
-                    &self.#field_name
+                fn get(self) -> #field_ty {
+                    self.#field_name
                 }
             }
         });

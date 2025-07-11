@@ -8,6 +8,6 @@ fn test_field_struct() {
         b: &'static str,
     }
     let ctx = Ctx { a: 42, b: "hello" };
-    assert_eq!(*<Ctx as Has<u32>>::get(&ctx), 42u32);
-    assert_eq!(*<Ctx as Has<&'static str>>::get(&ctx), "hello");
+    assert_eq!(<Ctx as Has<u32>>::get(ctx.clone()), 42u32);
+    assert_eq!(<Ctx as Has<&'static str>>::get(ctx), "hello");
 }
