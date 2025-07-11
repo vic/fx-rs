@@ -10,8 +10,8 @@ struct Ctx {
 }
 
 impl Has<u32> for Ctx {
-    fn get(&self) -> &u32 {
-        &self.a
+    fn get(self) -> u32 {
+        self.a
     }
 }
 impl Put<u32> for Ctx {
@@ -28,8 +28,8 @@ struct ST {
 }
 
 impl Has<i32> for ST {
-    fn get(&self) -> &i32 {
-        &self.a
+    fn get(self) -> i32 {
+        self.a
     }
 }
 impl Put<i32> for ST {
@@ -39,8 +39,8 @@ impl Put<i32> for ST {
     }
 }
 impl Has<String> for ST {
-    fn get(&self) -> &String {
-        &self.b
+    fn get(self) -> String {
+        self.b
     }
 }
 impl Put<String> for ST {
@@ -62,7 +62,7 @@ impl ST {
 fn from_has_put_lens() {
     let lens: Lens<Ctx, u32> = Lens::new();
     let ctx = Ctx { a: 1, b: "hi" };
-    assert_eq!(lens.get(ctx.clone()), 1);
+    assert_eq!(<Ctx as Has<u32>>::get(ctx.clone()), 1);
     let updated = lens.set(ctx, 42);
     assert_eq!(updated, Ctx { a: 42, b: "hi" });
 }
@@ -146,8 +146,8 @@ fn prepend_composes_lenses() {
         st: ST,
     }
     impl Has<ST> for Outer {
-        fn get(&self) -> &ST {
-            &self.st
+        fn get(self) -> ST {
+            self.st
         }
     }
     impl Put<ST> for Outer {
@@ -165,7 +165,7 @@ fn prepend_composes_lenses() {
     let st_lens = Lens::<Outer, ST>::new();
     let a_lens = Lens::<ST, i32>::new();
     let composed = a_lens.prepend(st_lens);
-    assert_eq!(composed.get(outer.clone()), 5);
+    assert_eq!(Lens::get(&composed, outer.clone()), 5);
     let updated = composed.set(outer, 99);
     assert_eq!(updated.st.a, 99);
 }
@@ -179,8 +179,8 @@ fn append_composes_lenses() {
         st: ST,
     }
     impl Has<ST> for Outer {
-        fn get(&self) -> &ST {
-            &self.st
+        fn get(self) -> ST {
+            self.st
         }
     }
     impl Put<ST> for Outer {
@@ -198,7 +198,7 @@ fn append_composes_lenses() {
     let st_lens = Lens::<Outer, ST>::new();
     let a_lens = Lens::<ST, i32>::new();
     let composed = st_lens.append(a_lens);
-    assert_eq!(composed.get(outer.clone()), 5);
+    assert_eq!(Lens::get(&composed, outer.clone()), 5);
     let updated = composed.set(outer, 123);
     assert_eq!(updated.st.a, 123);
 }
@@ -207,7 +207,7 @@ fn append_composes_lenses() {
 fn left_lens_accesses_left_of_tuple() {
     let pair: (i32, &str) = (10, "hi");
     let left = Lens::<'_, (i32, &str), i32>::left::<&str>();
-    assert_eq!(left.get(pair.clone()), 10);
+    assert_eq!(Lens::get(&left, pair.clone()), 10);
     let updated = left.set(pair, 42);
     assert_eq!(updated.0, 42);
 }
@@ -216,7 +216,7 @@ fn left_lens_accesses_left_of_tuple() {
 fn right_lens_accesses_right_of_tuple() {
     let pair: (i32, &str) = (10, "hi");
     let right = Lens::<'_, (i32, &str), &str>::right::<i32>();
-    assert_eq!(right.get(pair.clone()), "hi");
+    assert_eq!(Lens::get(&right, pair.clone()), "hi");
     let updated = right.set(pair, "bye");
     assert_eq!(updated.1, "bye");
 }

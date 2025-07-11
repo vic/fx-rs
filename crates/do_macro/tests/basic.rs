@@ -67,13 +67,13 @@ struct Ctx {
 }
 
 impl Has<A> for Ctx {
-    fn get(&self) -> &A {
-        &self.a
+    fn get(self) -> A {
+        self.a
     }
 }
 impl Has<B> for Ctx {
-    fn get(&self) -> &B {
-        &self.b
+    fn get(self) -> B {
+        self.b
     }
 }
 
@@ -89,13 +89,13 @@ fn test_struct_field() {
 }
 
 impl Has<A> for (A, B) {
-    fn get(&self) -> &A {
-        &self.0
+    fn get(self) -> A {
+        self.0
     }
 }
 impl Has<B> for (A, B) {
-    fn get(&self) -> &B {
-        &self.1
+    fn get(self) -> B {
+        self.1
     }
 }
 

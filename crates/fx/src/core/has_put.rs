@@ -4,11 +4,11 @@ pub trait Has<T>
 where
     Self: DynClone,
 {
-    fn get<'f>(&'f self) -> &'f T;
+    fn get(self) -> T;
 }
 
 impl<T: Clone> Has<T> for T {
-    fn get<'f>(&'f self) -> &'f T {
+    fn get(self) -> T {
         self
     }
 }
