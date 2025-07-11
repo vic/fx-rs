@@ -1,5 +1,5 @@
-use super::{pair::Pair, has_put::Put};
 use super::super::kernel::fx::Fx;
+use super::{has_put::Put, pair::Pair};
 
 impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
     pub fn provide<T: Clone>(self, s: S) -> Fx<'a, T, V> {
@@ -16,8 +16,10 @@ impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
         self.contra_map(|b: B| cmap(a, b), fmap)
     }
 
-    pub fn provide_has<T>(self, t: T) -> Fx<'a, S, V> 
-    where S: Put<T>, T: Clone + 'a
+    pub fn update_context<T>(self, t: T) -> Fx<'a, S, V>
+    where
+        S: Put<T>,
+        T: Clone + 'a,
     {
         self.contra_map(|p: S| p.put(t), |_, p| p)
     }

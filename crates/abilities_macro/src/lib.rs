@@ -32,9 +32,7 @@ pub fn abilities(input: TokenStream) -> TokenStream {
                                 f
                             }
                             pub fn #method_ident<'f, P, A>(arg: #input_ty) -> Fx<'f, P, #ret_ty>
-                            where 
-                            A: Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f + Clone,
-                            P: Pair<A, #ctx_ty> {
+                            where A: Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f + Clone, P: Pair<A, #ctx_ty> {
                                 Abilities::request::<P, A>(arg)
                             }
                         }
