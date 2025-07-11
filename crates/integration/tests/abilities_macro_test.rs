@@ -27,7 +27,7 @@ fn check_types() {
 #[test]
 fn ability_from_closure() {
     let _: Box<dyn Ability<'_, String, (), usize>> =
-        Foo::length_ability(|line: String| Fx::value(line.len()));
+        Box::new(Foo::length_ability(|line: String| Fx::value(line.len())));
     let _: Box<dyn Ability<'_, String, (), usize>> = Box::new(|line: String| Fx::value(line.len()));
 }
 
@@ -39,13 +39,14 @@ fn check_type_of_ability_requests() {
     {
     }
     check_type(Abilities::request::<(_, _), _>("hello".to_owned()));
-    check_type(Foo::length::<(_, _)>("Hello".to_owned()));
+    check_type(Foo::length::<(_, _), _>("Hello".to_owned()));
 }
 
 #[test]
 fn ctx_ability_from_closure() {
-    let _: Box<dyn Ability<'_, u8, String, usize>> =
-        Baz::len_add_ability(|n: u8| Fx::func(move |s: String| s.len() + (n as usize)));
+    let _: Box<dyn Ability<'_, u8, String, usize>> = Box::new(Baz::len_add_ability(|n: u8| {
+        Fx::func(move |s: String| s.len() + (n as usize))
+    }));
     let _: Box<dyn Ability<'_, u8, String, usize>> =
         Box::new(|n: u8| Fx::func(move |s: String| s.len() + (n as usize)));
 }
@@ -58,5 +59,5 @@ fn ctx_check_type_of_ability_requests() {
     {
     }
     check_type(Abilities::request::<(_, _), _>(10u8));
-    check_type(Baz::len_add::<(_, _)>(10u8));
+    check_type(Baz::len_add::<(_, _), _>(10u8));
 }

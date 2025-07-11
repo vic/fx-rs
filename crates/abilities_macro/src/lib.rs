@@ -27,13 +27,15 @@ pub fn abilities(input: TokenStream) -> TokenStream {
                     // Associated function for ability construction
                     output.extend(quote! {
                         impl #trait_ident {
-                            pub fn #ability_fn_ident<'f, F>(f: F) -> Box<dyn Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f>
+                            pub fn #ability_fn_ident<'f, F>(f: F) -> impl Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f
                             where F: FnOnce(#input_ty) -> Fx<'f, #ctx_ty, #ret_ty> + Clone + 'f {
-                                Box::new(f)
+                                f
                             }
-                            pub fn #method_ident<'f, P>(arg: #input_ty) -> Fx<'f, P, #ret_ty>
-                            where P: Pair<Box<dyn Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f>, #ctx_ty> {
-                                Abilities::request::<P, Box<dyn Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f>>(arg)
+                            pub fn #method_ident<'f, P, A>(arg: #input_ty) -> Fx<'f, P, #ret_ty>
+                            where 
+                            A: Ability<'f, #input_ty, #ctx_ty, #ret_ty> + 'f + Clone,
+                            P: Pair<A, #ctx_ty> {
+                                Abilities::request::<P, A>(arg)
                             }
                         }
                     });
