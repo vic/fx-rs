@@ -33,15 +33,8 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
     let marker_structs = marker_types
         .iter()
         .map(|ty| quote! { #[derive(Clone)] pub struct #ty; });
-    let absent_generics = vec![quote! { Absent }; marker_types.len()];
-    let present_generics = vec![quote! { Present }; marker_types.len()];
-    // Derive Clone for Absent/Present
-    let marker_absent_present = quote! {
-        #[derive(Clone)]
-        pub struct Absent;
-        #[derive(Clone)]
-        pub struct Present;
-    };
+    let absent_generics = vec![quote! { builder_types::Absent }; marker_types.len()];
+    let present_generics = vec![quote! { builder_types::Present }; marker_types.len()];
 
     // Generate unique builder field names
     let builder_field_idents: Vec<_> = field_idents
@@ -73,7 +66,7 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
     // put_x for each field
     let mut put_methods = Vec::new();
     for (i, (id, ty)) in field_idents.iter().zip(field_types.iter()).enumerate() {
-        let mut generics = marker_types.clone();
+        let generics = marker_types.clone();
         let mut next_generics = generics.clone();
         next_generics[i] = format_ident!("Present");
         let assignments = builder_field_idents.iter().enumerate().map(|(j, f)| {
@@ -136,9 +129,9 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
     for (i, ty) in field_types.iter().enumerate() {
         let mut generics = marker_types
             .iter()
-            .map(|_| quote! { Absent })
+            .map(|_| quote! { builder_types::Absent })
             .collect::<Vec<_>>();
-        generics[i] = quote! { Present };
+        generics[i] = quote! { builder_types::Present };
         let builder_ty = quote! { #builder_name<#(#generics),*> };
         let builder_field = &builder_field_idents[i];
         has_impls.push(quote! {
@@ -151,7 +144,6 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
     }
 
     let expanded = quote! {
-        #marker_absent_present
         #(#marker_structs)*
         #builder_struct
         impl<#(#marker_types),*> #builder_name<#(#marker_types),*> {

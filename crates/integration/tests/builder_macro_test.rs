@@ -1,4 +1,5 @@
-use builder_macro::ContextBuilder;
+use builder_macro::{ContextBuilder};
+use builder_types::{Absent, Present};
 use fx::Has;
 use fx_field::HasFields;
 

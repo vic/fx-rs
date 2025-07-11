@@ -10,3 +10,4 @@ proc-macro = true
 syn = "2"
 quote = "1"
 proc-macro2 = "1"
+builder_types = { path = "../builder_types" }
