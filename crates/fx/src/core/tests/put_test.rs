@@ -14,9 +14,9 @@ struct Ctx {
     b: &'static str,
 }
 
-impl Put<u32> for Ctx {
-    fn put(mut self, value: u32) -> Self {
-        self.a = value;
+impl Put<u32, Ctx> for Ctx {
+    fn put(mut self, a: u32) -> Ctx {
+        self.a = a;
         self
     }
 }

@@ -67,8 +67,8 @@ pub fn derive_has_put(input: TokenStream) -> TokenStream {
         let fname = f.ident.as_ref().unwrap();
         let fty = &f.ty;
         quote! {
-            impl #impl_generics ::fx::Put<#fty> for #name #ty_generics #where_clause {
-                fn put(mut self, value: #fty) -> Self {
+            impl #impl_generics ::fx::Put<#fty, #name #ty_generics> for #name #ty_generics #where_clause {
+                fn put(mut self, value: #fty) -> #name #ty_generics {
                     self.#fname = value;
                     self
                 }

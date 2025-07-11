@@ -13,21 +13,21 @@ impl<T: Clone> Has<T> for T {
     }
 }
 
-pub trait Put<T> {
-    fn put(self, value: T) -> Self;
+pub trait Put<T, U> {
+    fn put(self, value: T) -> U;
 }
 
-impl<T: Clone> Put<T> for T {
-    fn put(self, value: T) -> Self {
+impl<T: Clone> Put<T, T> for T {
+    fn put(self, value: T) -> T {
         value
     }
 }
 
-pub trait HasPut<T>
+pub trait HasPut<T, U>
 where
-    Self: Has<T> + Put<T>,
+    Self: Has<T> + Put<T, U>,
 {
 }
 
-impl<I, O> HasPut<I> for O where O: Has<I> + Put<I> {}
+impl<I, O, U> HasPut<I, U> for O where O: Has<I> + Put<I, U> {}
 clone_trait_object!(<T> Has<T>);

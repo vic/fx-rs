@@ -18,7 +18,7 @@ impl<'a, S: Clone, V: Clone> Fx<'a, S, V> {
 
     pub fn update_context<T>(self, t: T) -> Fx<'a, S, V>
     where
-        S: Put<T>,
+        S: Put<T, S>,
         T: Clone + 'a,
     {
         self.contra_map(|p: S| p.put(t), |_, p| p)

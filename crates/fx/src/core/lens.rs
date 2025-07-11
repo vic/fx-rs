@@ -1,7 +1,11 @@
 use dyn_clone::{DynClone, clone_trait_object};
 
 use crate::{
-    core::{handler::Handler, has_put::HasPut, pair::Pair},
+    core::{
+        handler::Handler,
+        has_put::{HasPut, Put},
+        pair::Pair,
+    },
     kernel::fx::Fx,
 };
 
@@ -16,7 +20,7 @@ where
     pub fn new() -> Self
     where
         Inner: Clone,
-        Outer: HasPut<Inner> + Clone,
+        Outer: HasPut<Inner, Outer> + Put<Inner, Outer> + Clone,
     {
         Self(
             Box::new(|outer: Outer| outer.get().clone()),

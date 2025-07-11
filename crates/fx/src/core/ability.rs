@@ -1,7 +1,12 @@
 use std::marker::PhantomData;
 
 use crate::{
-    core::{handler::Handler, has_put::HasPut, pair::Pair, state::State},
+    core::{
+        handler::Handler,
+        has_put::{HasPut, Put},
+        pair::Pair,
+        state::State,
+    },
     kernel::{ability::Ability, fx::Fx},
 };
 
@@ -40,7 +45,7 @@ where
     pub fn lift_req<P, A>(i: I) -> Fx<'f, P, O>
     where
         A: Ability<'f, I, S, O> + Clone,
-        P: HasPut<A> + HasPut<S> + Clone,
+        P: HasPut<A, P> + HasPut<S, P> + Put<A, P> + Put<S, P> + Clone,
     {
         State::<A>::get().lift_map(|a: A| a.apply(i))
     }

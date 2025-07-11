@@ -143,6 +143,37 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
         });
     }
 
+    // Conditional Put impls for builder (using new trait signature)
+    let mut put_impls = Vec::new();
+    for (i, (ty, _)) in field_types.iter().zip(field_idents.iter()).enumerate() {
+        let generics = marker_types
+            .iter()
+            .map(|_| quote! { builder_types::Absent })
+            .collect::<Vec<_>>();
+        let mut next_generics = generics.clone();
+        next_generics[i] = quote! { builder_types::Present };
+        let builder_ty = quote! { #builder_name<#(#generics),*> };
+        let next_builder_ty = quote! { #builder_name<#(#next_generics),*> };
+        let builder_field = &builder_field_idents[i];
+        let assignments = builder_field_idents.iter().enumerate().map(|(j, f)| {
+            if i == j {
+                quote! { #f: Some(value) }
+            } else {
+                quote! { #f: self.#f }
+            }
+        });
+        put_impls.push(quote! {
+            impl Put<#ty, #next_builder_ty> for #builder_ty {
+                fn put(self, value: #ty) -> #next_builder_ty {
+                    #builder_name {
+                        #(#assignments,)*
+                        _marker: std::marker::PhantomData,
+                    }
+                }
+            }
+        });
+    }
+
     let expanded = quote! {
         #(#marker_structs)*
         #builder_struct
@@ -153,6 +184,7 @@ pub fn context_builder(input: TokenStream) -> TokenStream {
         #(#put_methods)*
         #build_impl
         #(#has_impls)*
+        #(#put_impls)*
     };
     TokenStream::from(expanded)
 }

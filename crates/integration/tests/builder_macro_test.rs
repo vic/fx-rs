@@ -1,6 +1,7 @@
-use builder_macro::{ContextBuilder};
+use builder_macro::ContextBuilder;
 use builder_types::{Absent, Present};
 use fx::Has;
+use fx::Put;
 use fx_field::HasFields;
 
 #[derive(HasFields, ContextBuilder, Debug, PartialEq, Clone)]
@@ -126,4 +127,15 @@ fn has_trait_impl_only_when_field_present() {
     let builder_absent = FooBuilder::<Absent, Absent, Absent>::empty();
     // The following line should fail to compile if uncommented:
     // assert_has_a(&builder_absent);
+}
+
+#[test]
+fn put_trait_enables_has_trait() {
+    // Builder with field 'a' absent
+    let builder = FooBuilder::<Absent, Absent, Absent>::empty();
+    // Use .put() method to set 'a' and enable Has
+    let builder_with_a = builder.put(123); // Now FooBuilder<Present, Absent, Absent>
+    fn assert_has_a<T: Has<usize>>(_t: &T) {}
+    assert_has_a(&builder_with_a); // Should compile
+    assert_eq!(builder_with_a.maybe_a(), Some(123));
 }
