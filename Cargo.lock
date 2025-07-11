@@ -15,6 +15,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "builder_macro"
+version = "0.1.0"
+dependencies = [
+ "builder_types",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.104",
+]
+
+[[package]]
+name = "builder_types"
+version = "0.1.0"
+
+[[package]]
 name = "do_traits"
 version = "0.0.0-git"
 dependencies = [
@@ -78,6 +92,8 @@ name = "integration"
 version = "0.0.0-git"
 dependencies = [
  "abilities_macro",
+ "builder_macro",
+ "builder_types",
  "dyn-clone",
  "fx",
  "fx-do",

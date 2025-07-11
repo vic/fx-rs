@@ -25,16 +25,16 @@ impl Has<i32> for Ctx {
         self.a
     }
 }
-impl Put<i32> for Ctx {
-    fn put(mut self, value: i32) -> Self {
-        self.a = value;
+impl Put<i32, Ctx> for Ctx {
+    fn put(mut self, a: i32) -> Ctx {
+        self.a = a;
         self
     }
 }
 
-impl Put<String> for Ctx {
-    fn put(mut self, value: String) -> Self {
-        self.b = value;
+impl Put<String, Ctx> for Ctx {
+    fn put(mut self, b: String) -> Ctx {
+        self.b = b;
         self
     }
 }

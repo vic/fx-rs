@@ -14,9 +14,9 @@ impl Has<u32> for Ctx {
         self.a
     }
 }
-impl Put<u32> for Ctx {
-    fn put(mut self, value: u32) -> Self {
-        self.a = value;
+impl Put<u32, Ctx> for Ctx {
+    fn put(mut self, a: u32) -> Ctx {
+        self.a = a;
         self
     }
 }
@@ -32,9 +32,9 @@ impl Has<i32> for ST {
         self.a
     }
 }
-impl Put<i32> for ST {
-    fn put(mut self, value: i32) -> Self {
-        self.a = value;
+impl Put<i32, ST> for ST {
+    fn put(mut self, a: i32) -> ST {
+        self.a = a;
         self
     }
 }
@@ -43,9 +43,9 @@ impl Has<String> for ST {
         self.b
     }
 }
-impl Put<String> for ST {
-    fn put(mut self, value: String) -> Self {
-        self.b = value;
+impl Put<String, ST> for ST {
+    fn put(mut self, b: String) -> ST {
+        self.b = b;
         self
     }
 }
@@ -150,9 +150,9 @@ fn prepend_composes_lenses() {
             self.st
         }
     }
-    impl Put<ST> for Outer {
-        fn put(mut self, value: ST) -> Self {
-            self.st = value;
+    impl Put<ST, Outer> for Outer {
+        fn put(mut self, st: ST) -> Outer {
+            self.st = st;
             self
         }
     }
@@ -183,9 +183,9 @@ fn append_composes_lenses() {
             self.st
         }
     }
-    impl Put<ST> for Outer {
-        fn put(mut self, value: ST) -> Self {
-            self.st = value;
+    impl Put<ST, Outer> for Outer {
+        fn put(mut self, st: ST) -> Outer {
+            self.st = st;
             self
         }
     }

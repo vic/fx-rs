@@ -107,9 +107,8 @@ fn lift_req_composes_ability_and_state() {
             self.ab
         }
     }
-    impl Put<MyAbility> for Ctx {
-        fn put(mut self, ab: MyAbility) -> Self {
-            self.ab = ab;
+    impl Put<MyAbility, Ctx> for Ctx {
+        fn put(self, _: MyAbility) -> Ctx {
             self
         }
     }
@@ -118,9 +117,8 @@ fn lift_req_composes_ability_and_state() {
             self.n
         }
     }
-    impl Put<i32> for Ctx {
-        fn put(mut self, n: i32) -> Self {
-            self.n = n;
+    impl Put<i32, Ctx> for Ctx {
+        fn put(self, _: i32) -> Ctx {
             self
         }
     }

@@ -19,9 +19,8 @@ impl Has<A> for S {
         self.a
     }
 }
-impl Put<A> for S {
-    fn put(mut self, value: A) -> Self {
-        self.a = value;
+impl Put<A, S> for S {
+    fn put(self, _: A) -> S {
         self
     }
 }
@@ -30,9 +29,8 @@ impl Has<B> for S {
         self.b
     }
 }
-impl Put<B> for S {
-    fn put(mut self, value: B) -> Self {
-        self.b = value;
+impl Put<B, S> for S {
+    fn put(self, _: B) -> S {
         self
     }
 }

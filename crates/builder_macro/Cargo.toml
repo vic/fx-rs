@@ -1,0 +1,13 @@
+[package]
+name = "builder_macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "2"
+quote = "1"
+proc-macro2 = "1"
+builder_types = { path = "../builder_types" }

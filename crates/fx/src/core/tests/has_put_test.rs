@@ -18,6 +18,6 @@ fn has_and_put_for_string() {
 
 #[test]
 fn has_put_trait_bound_for_u32() {
-    fn assert_has_put<T: HasPut<u32>>() {}
+    fn assert_has_put<T: HasPut<u32, T>>() {}
     assert_has_put::<u32>();
 }

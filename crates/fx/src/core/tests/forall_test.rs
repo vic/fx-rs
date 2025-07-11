@@ -49,15 +49,15 @@ impl Has<bool> for S2 {
         self.y
     }
 }
-impl Put<i32> for S2 {
-    fn put(mut self, value: i32) -> Self {
-        self.x = value;
+impl Put<i32, S2> for S2 {
+    fn put(mut self, x: i32) -> S2 {
+        self.x = x;
         self
     }
 }
-impl Put<bool> for S2 {
-    fn put(mut self, value: bool) -> Self {
-        self.y = value;
+impl Put<bool, S2> for S2 {
+    fn put(mut self, y: bool) -> S2 {
+        self.y = y;
         self
     }
 }
