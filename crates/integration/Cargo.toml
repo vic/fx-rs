@@ -15,3 +15,4 @@ fx-do = { path = "../do_macro" }
 fx-field = { path = "../field_macro" }
 abilities_macro = { path = "../abilities_macro" }
 dyn-clone = "1.0.19"
+builder_macro = { path = "../builder_macro" }
