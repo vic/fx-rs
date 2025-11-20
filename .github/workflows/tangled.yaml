@@ -9,3 +9,5 @@ concurrency:
 jobs:
   tangled:
     uses: vic/vic/.github/workflows/tangled.yml@main
+    secrets:
+      TANGLED_SSH_KEY: ${{secrets.TANGLED_SSH_KEY}}
